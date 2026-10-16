@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { 
   ShieldCheck, 
@@ -16,17 +15,15 @@ import {
   RefreshCw, 
   Search, 
   AlertCircle,
-  LogOut
 } from 'lucide-react';
+import HeaderUserNav from '@/components/HeaderUserNav';
 import type { Profile, ContractWithDetails, AdminMetrics } from '@/types/database';
 
 type AdminTab = 'verifications' | 'deals';
 type DealFilter = 'All' | 'Proposed' | 'Accepted' | 'In Review' | 'Completed';
 
 export default function AdminOperationsPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('verifications');
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Data states
   const [creators, setCreators] = useState<Profile[]>([]);
@@ -149,24 +146,6 @@ export default function AdminOperationsPage() {
     });
   }, [deals, dealStatusFilter, searchQuery]);
 
-  // Sign out handler
-  const handleSignOut = async () => {
-    setIsSigningOut(true);
-    const toastId = toast.loading('Signing out of operations desk...');
-    try {
-      await Promise.allSettled([
-        fetch('/api/auth/logout', { method: 'POST' }),
-        fetch('/api/admin/auth', { method: 'DELETE' }),
-      ]);
-      toast.success('Signed out successfully.', { id: toastId });
-      router.push('/login');
-      router.refresh();
-    } catch {
-      toast.error('Error signing out', { id: toastId });
-      setIsSigningOut(false);
-    }
-  };
-
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Top Navigation */}
@@ -188,6 +167,9 @@ export default function AdminOperationsPage() {
             <Link href="/admin" className="text-sky-400 font-semibold">
               Admin Desk
             </Link>
+            <Link href="/settings" className="text-slate-400 hover:text-white transition">
+              Settings
+            </Link>
           </div>
         </div>
 
@@ -195,20 +177,14 @@ export default function AdminOperationsPage() {
           <button
             onClick={loadAdminData}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
+            title="Refresh Desk"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Refresh Desk</span>
+            <span className="hidden sm:inline">Refresh</span>
           </button>
 
-          <button
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 bg-red-950/30 border border-red-900/60 hover:bg-red-900/40 hover:text-red-300 rounded-xl transition disabled:opacity-50"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
+          <HeaderUserNav />
         </div>
       </nav>
 

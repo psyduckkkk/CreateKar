@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
 import ProposalModal from '@/components/ProposalModal';
+import HeaderUserNav from '@/components/HeaderUserNav';
 
 const FILTER_NICHES = ['All', 'Tech', 'Fashion', 'Fitness', 'Lifestyle'] as const;
 type FilterNiche = (typeof FILTER_NICHES)[number];
@@ -87,7 +88,7 @@ export default function CreatorsDirectoryPage() {
       {/* Top Navigation */}
       <nav className="flex items-center justify-between pb-6 mb-8 border-b border-slate-800">
         <div className="flex items-center gap-6">
-          <Link href="/creators" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <Link href="/" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
             <span className="text-sky-500">Create</span>Kar
           </Link>
           <div className="hidden sm:flex items-center gap-4 text-sm font-medium">
@@ -101,17 +102,24 @@ export default function CreatorsDirectoryPage() {
               href="/dashboard" 
               className="text-slate-400 hover:text-white transition"
             >
-              Deals Inbox
+              Creator Inbox
+            </Link>
+            <Link 
+              href="/agency/dashboard" 
+              className="text-slate-400 hover:text-white transition"
+            >
+              Agency Dashboard
+            </Link>
+            <Link 
+              href="/settings" 
+              className="text-slate-400 hover:text-white transition"
+            >
+              Settings
             </Link>
           </div>
         </div>
 
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition"
-        >
-          View Deals Inbox
-        </Link>
+        <HeaderUserNav />
       </nav>
 
       {/* Header section */}

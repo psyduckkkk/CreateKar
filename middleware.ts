@@ -84,14 +84,16 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // 4. Protected page routes: /dashboard, /agency, /admin
+  // 4. Protected page routes: /dashboard, /agency, /admin, /settings
   const isProtectedPath =
     pathname === '/dashboard' ||
     pathname.startsWith('/dashboard/') ||
     pathname === '/agency' ||
     pathname.startsWith('/agency/') ||
     pathname === '/admin' ||
-    pathname.startsWith('/admin/');
+    pathname.startsWith('/admin/') ||
+    pathname === '/settings' ||
+    pathname.startsWith('/settings/');
 
   if (isProtectedPath) {
     // If not authenticated at all:
@@ -149,6 +151,8 @@ export const config = {
     '/agency/:path*',
     '/admin',
     '/admin/:path*',
+    '/settings',
+    '/settings/:path*',
     '/api/admin/:path*',
     '/login',
     '/signup',

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { query } from '@/lib/db';
+import { verifyUserToken, COOKIE_NAME } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,12 +11,31 @@ interface CreateContractRequestBody {
   deliverableType: string;
   budget: number | string;
   deadline: string;
-  agencyId?: string;
   description?: string;
 }
 
 export async function POST(request: Request) {
   try {
+    // 1. Authenticate user from session cookie
+    const cookieStore = cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    const session = token ? await verifyUserToken(token) : null;
+
+    if (!session || (session.role !== 'agency' && session.role !== 'admin')) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'UNAUTHORIZED_AGENCY',
+            message: 'Only registered brand agencies can propose contracts.',
+          },
+        },
+        { status: 401 }
+      );
+    }
+
+    // Agency ID is automatically set from authenticated session
+    const agencyId = session.id;
+
     const body = (await request.json()) as CreateContractRequestBody;
 
     // Validate required fields
@@ -41,40 +62,6 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       );
-    }
-
-    // Resolve agency profile ID
-    let agencyId = body.agencyId;
-    if (!agencyId) {
-      const agencyQuery = await query<{ id: string }>(
-        `SELECT id FROM profiles WHERE role = 'agency' LIMIT 1`
-      );
-
-      if (agencyQuery.success && agencyQuery.data.length > 0) {
-        agencyId = agencyQuery.data[0].id;
-      } else {
-        // Fallback: ensure a default verified agency profile exists
-        const fallbackAgency = await query<{ id: string }>(
-          `INSERT INTO profiles (user_id, role, display_name, handle, bio, niche, is_verified)
-           VALUES ('agency_default', 'agency', 'CreateKar Brand Studio', '@ckbrand', 'Brand Studio Campaign Manager', 'Brand', true)
-           ON CONFLICT (user_id) DO UPDATE SET display_name = EXCLUDED.display_name
-           RETURNING id`
-        );
-
-        if (fallbackAgency.success && fallbackAgency.data.length > 0) {
-          agencyId = fallbackAgency.data[0].id;
-        } else {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'AGENCY_RESOLUTION_FAILED',
-                message: 'Unable to resolve or create an agency profile for this contract.',
-              },
-            },
-            { status: 500 }
-          );
-        }
-      }
     }
 
     // Verify target creator exists
@@ -182,8 +169,24 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // 1. Authenticate user from session cookie
+    const cookieStore = cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    const session = token ? await verifyUserToken(token) : null;
+
+    if (!session) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required to access contracts.',
+          },
+        },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
-    const creatorId = searchParams.get('creator_id');
 
     let queryText = `
       SELECT 
@@ -229,9 +232,24 @@ export async function GET(request: Request) {
     `;
 
     const params: unknown[] = [];
-    if (creatorId) {
+
+    // Session-scoping:
+    if (session.role === 'creator') {
       queryText += ` WHERE c.creator_id = $1`;
-      params.push(creatorId);
+      params.push(session.id);
+    } else if (session.role === 'agency') {
+      queryText += ` WHERE c.agency_id = $1`;
+      params.push(session.id);
+    } else if (session.role === 'admin') {
+      const creatorId = searchParams.get('creator_id');
+      const agencyIdParam = searchParams.get('agency_id');
+      if (creatorId) {
+        queryText += ` WHERE c.creator_id = $1`;
+        params.push(creatorId);
+      } else if (agencyIdParam) {
+        queryText += ` WHERE c.agency_id = $1`;
+        params.push(agencyIdParam);
+      }
     }
 
     queryText += ` ORDER BY c.updated_at DESC`;
