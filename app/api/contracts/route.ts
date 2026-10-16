@@ -203,14 +203,24 @@ export async function GET(request: Request) {
         p_creator.handle AS creator_handle,
         p_creator.avatar_url AS creator_avatar,
         p_agency.display_name AS agency_name,
+        d.revision_notes,
+        d.status AS deliverable_status,
+        d.file_url AS last_submitted_url,
         (
-          SELECT json_agg(d ORDER BY d.updated_at DESC)
-          FROM deliverables d
-          WHERE d.contract_id = c.id
+          SELECT json_agg(deliv ORDER BY deliv.updated_at DESC)
+          FROM deliverables deliv
+          WHERE deliv.contract_id = c.id
         ) AS submitted_deliverables
       FROM contracts c
       JOIN profiles p_creator ON c.creator_id = p_creator.id
       LEFT JOIN profiles p_agency ON c.agency_id = p_agency.id
+      LEFT JOIN LATERAL (
+        SELECT status, revision_notes, file_url 
+        FROM deliverables 
+        WHERE contract_id = c.id 
+        ORDER BY updated_at DESC 
+        LIMIT 1
+      ) d ON true
     `;
 
     const params: unknown[] = [];
@@ -219,7 +229,7 @@ export async function GET(request: Request) {
       params.push(creatorId);
     }
 
-    queryText += ` ORDER BY c.created_at DESC`;
+    queryText += ` ORDER BY c.updated_at DESC`;
 
     const result = await query(queryText, params);
 
@@ -239,6 +249,9 @@ export async function GET(request: Request) {
       ...c,
       total_amount: Number(c.total_amount) || 0,
       platform_fee: Number(c.platform_fee) || 499,
+      revision_notes: c.revision_notes || null,
+      deliverable_status: c.deliverable_status || null,
+      last_submitted_url: c.last_submitted_url || null,
       submitted_deliverables: c.submitted_deliverables || [],
     }));
 

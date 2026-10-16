@@ -134,3 +134,15 @@ export interface AdminMetrics {
   verifiedCreatorsCount?: number;
 }
 
+export interface DashboardContract extends Contract {
+  creator_name?: string;
+  creator_handle?: string;
+  creator_avatar?: string;
+  agency_name?: string;
+  revision_notes?: string | null;
+  deliverable_status?: DeliverableStatus | null;
+  last_submitted_url?: string | null;
+  submitted_deliverables?: Deliverable[];
+}
+
+

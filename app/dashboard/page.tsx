@@ -16,15 +16,7 @@ import {
   Calendar,
   Sparkles
 } from 'lucide-react';
-import type { Contract, Deliverable, ContractDeliverableItem } from '@/types/database';
-
-interface DashboardContract extends Contract {
-  creator_name?: string;
-  creator_handle?: string;
-  creator_avatar?: string;
-  agency_name?: string;
-  submitted_deliverables?: Deliverable[];
-}
+import type { Deliverable, ContractDeliverableItem, DashboardContract } from '@/types/database';
 
 export default function CreatorDashboardPage() {
   const [contracts, setContracts] = useState<DashboardContract[]>([]);
@@ -278,10 +270,17 @@ export default function CreatorDashboardPage() {
                       </span>
                     )}
                     {contract.status === 'ACCEPTED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/70 text-sky-300 border border-sky-800/80">
-                        <Check className="w-3.5 h-3.5" />
-                        Accepted
-                      </span>
+                      contract.deliverable_status === 'REVISION_REQUESTED' ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          Revision Requested
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/70 text-sky-300 border border-sky-800/80">
+                          <Check className="w-3.5 h-3.5" />
+                          Accepted
+                        </span>
+                      )
                     )}
                     {contract.status === 'IN_REVIEW' && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/70 text-purple-300 border border-purple-800/80">
@@ -386,51 +385,89 @@ export default function CreatorDashboardPage() {
                   )}
 
                   {/* Status: ACCEPTED -> Show Inline Deliverable Submission Form */}
-                  {contract.status === 'ACCEPTED' && (
-                    <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                        <Upload className="w-4 h-4 text-sky-400" />
-                        Submit Deliverable
-                      </h3>
-                      <p className="text-xs text-slate-400 mb-3">
-                        Provide a viewable link to your final deliverable asset (Google Drive, Dropbox, Figma, or unlisted YouTube video).
-                      </p>
+                  {contract.status === 'ACCEPTED' && (() => {
+                    const isRevision = 
+                      contract.deliverable_status === 'REVISION_REQUESTED' || 
+                      Boolean(contract.revision_notes);
+                    const prevSubmission = contract.last_submitted_url || submittedUrl;
 
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <input
-                          type="url"
-                          required
-                          disabled={isMutating}
-                          value={submissionUrls[contract.id] || ''}
-                          onChange={(e) =>
-                            setSubmissionUrls((prev) => ({
-                              ...prev,
-                              [contract.id]: e.target.value,
-                            }))
-                          }
-                          placeholder="https://drive.google.com/... or https://youtu.be/..."
-                          className="flex-1 px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition disabled:opacity-50"
-                        />
-                        <button
-                          onClick={() => handleSubmitDeliverable(contract)}
-                          disabled={isMutating}
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition shadow-md shadow-sky-950/40 disabled:opacity-50 whitespace-nowrap"
-                        >
-                          {isMutating ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Submitting...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="w-4 h-4" />
-                              <span>Submit for Review</span>
-                            </>
-                          )}
-                        </button>
+                    return (
+                      <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-5">
+                        {/* Revision Feedback Alert Box */}
+                        {isRevision && contract.revision_notes && (
+                          <div className="mb-4 bg-amber-950/30 border border-amber-800/80 rounded-xl p-4 text-amber-200">
+                            <div className="flex items-center gap-2 font-semibold text-amber-300 text-sm mb-1.5">
+                              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                              <span>Revision Requested by Agency</span>
+                            </div>
+
+                            <p className="text-sm text-amber-100 bg-amber-950/50 p-3 rounded-lg border border-amber-900/60 italic mb-2">
+                              "{contract.revision_notes}"
+                            </p>
+
+                            {prevSubmission && (
+                              <div className="text-xs text-amber-300/90 pt-1 flex items-center gap-1.5">
+                                <span>Previous submission:</span>
+                                <a
+                                  href={prevSubmission}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 underline font-medium"
+                                >
+                                  <span className="truncate max-w-xs sm:max-w-md">{prevSubmission}</span>
+                                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <h3 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                          <Upload className="w-4 h-4 text-sky-400" />
+                          <span>{isRevision ? 'Submit Updated Deliverable Link' : 'Submit Deliverable'}</span>
+                        </h3>
+                        <p className="text-xs text-slate-400 mb-4">
+                          {isRevision
+                            ? 'Review the agency feedback above and submit your updated asset link (Google Drive, Dropbox, or unlisted video).'
+                            : 'Provide a viewable link to your final deliverable asset (Google Drive, Dropbox, Figma, or unlisted YouTube video).'}
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                          <input
+                            type="url"
+                            required
+                            disabled={isMutating}
+                            value={submissionUrls[contract.id] || ''}
+                            onChange={(e) =>
+                              setSubmissionUrls((prev) => ({
+                                ...prev,
+                                [contract.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="https://drive.google.com/... or https://youtu.be/..."
+                            className="flex-1 px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition disabled:opacity-50"
+                          />
+                          <button
+                            onClick={() => handleSubmitDeliverable(contract)}
+                            disabled={isMutating}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition shadow-md shadow-sky-950/40 disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {isMutating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Submitting...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                                <span>{isRevision ? 'Resubmit for Review' : 'Submit for Review'}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Status: IN_REVIEW -> Show Awaiting Agency Approval Badge & Link */}
                   {contract.status === 'IN_REVIEW' && (

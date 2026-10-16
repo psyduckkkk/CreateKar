@@ -104,14 +104,10 @@ export default function AgencyDashboardPage() {
     const toastId = toast.loading('Sending revision request to creator...');
 
     try {
-      const response = await fetch('/api/deliverables', {
-        method: 'PATCH',
+      const response = await fetch(`/api/contracts/${contractId}/revision`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractId,
-          status: 'REVISION_REQUESTED',
-          revision_notes: notes,
-        }),
+        body: JSON.stringify({ notes }),
       });
 
       const data = await response.json();
