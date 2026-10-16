@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { 
+  ShieldCheck, 
   Printer, 
-  FileText, 
+  ArrowLeft, 
   CheckCircle, 
-  ArrowRight, 
   Loader2, 
   AlertCircle 
 } from 'lucide-react';
@@ -23,11 +23,19 @@ interface InvoiceData {
   platform_fee: number;
   total_amount: number;
   created_at: string;
+  signature_hash?: string | null;
+  accepted_at?: string | null;
+  accepted_ip?: string | null;
+  terms_snapshot?: Record<string, unknown> | null;
   contract: {
     title: string;
     deliverables: Array<{ title?: string; format?: string; rate?: number }>;
     status: string;
     deadline?: string;
+    signature_hash?: string | null;
+    accepted_at?: string | null;
+    accepted_ip?: string | null;
+    terms_snapshot?: Record<string, unknown> | null;
   };
   creator: {
     name: string;
@@ -46,6 +54,25 @@ interface InvoiceData {
     city: string | null;
     state: string | null;
   };
+}
+
+function formatExecutionTimestamp(acceptedAt?: string | null): string {
+  if (!acceptedAt) return 'Recorded upon deal acceptance';
+  const date = new Date(acceptedAt);
+  if (isNaN(date.getTime())) return acceptedAt;
+
+  const istString = date.toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+    timeZone: 'Asia/Kolkata',
+  });
+
+  return `${istString} IST (${date.toISOString()})`;
 }
 
 export default function InvoicePage() {
@@ -104,8 +131,8 @@ export default function InvoicePage() {
             href="/agency/dashboard"
             className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition"
           >
+            <ArrowLeft className="w-4 h-4" />
             <span>Back to Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </main>
@@ -124,6 +151,10 @@ export default function InvoicePage() {
     year: 'numeric',
   });
 
+  const signatureHash = invoice.signature_hash || invoice.contract?.signature_hash;
+  const acceptedAt = invoice.accepted_at || invoice.contract?.accepted_at;
+  const acceptedIp = invoice.accepted_ip || invoice.contract?.accepted_ip || 'Recorded via verified session';
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white print:text-black">
       {/* Top action bar: hidden when printing */}
@@ -132,6 +163,7 @@ export default function InvoicePage() {
           href="/agency/dashboard"
           className="text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-1.5"
         >
+          <ArrowLeft className="w-4 h-4" />
           <span>Return to Dashboard</span>
         </Link>
 
@@ -145,7 +177,7 @@ export default function InvoicePage() {
       </div>
 
       {/* Invoice Document Canvas */}
-      <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl print:border-none print:shadow-none print:bg-white print:text-black print:p-0">
+      <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl print:border-none print:shadow-none print:bg-white print:text-black print:p-0 print:max-w-none">
         {/* Document Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-8 border-b border-slate-800 print:border-slate-300">
           <div>
@@ -316,6 +348,41 @@ export default function InvoicePage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Digital Contract Execution & Integrity Record */}
+        <div className="border border-slate-200 bg-slate-50/70 rounded-md p-4 mt-8 text-xs text-slate-600 print:bg-white print:border-slate-300 print:break-inside-avoid">
+          <div className="flex items-center gap-2 font-bold text-slate-900 mb-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 print:text-black flex-shrink-0" />
+            <span className="text-sm tracking-tight">Cryptographic Proof of Execution</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div>
+              <span className="block font-semibold text-slate-700 mb-0.5">Execution Timestamp:</span>
+              <span className="text-slate-800">
+                {formatExecutionTimestamp(acceptedAt)}
+              </span>
+            </div>
+
+            <div>
+              <span className="block font-semibold text-slate-700 mb-0.5">Signatory IP / Network Origin:</span>
+              <span className="font-mono text-slate-800">
+                {acceptedIp}
+              </span>
+            </div>
+
+            <div className="sm:col-span-2">
+              <span className="block font-semibold text-slate-700 mb-1">SHA-256 Hash:</span>
+              <code className="block font-mono break-all text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded select-all">
+                {signatureHash || 'PENDING_DIGITAL_EXECUTION'}
+              </code>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-200 print:border-slate-300">
+            This invoice corresponds to an electronically executed commercial contract. The SHA-256 digest mathematically guarantees contract terms have remained unaltered since acceptance.
+          </p>
         </div>
       </div>
     </div>

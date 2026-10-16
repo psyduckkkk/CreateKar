@@ -3,6 +3,41 @@ import { query } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+interface InvoiceDbRow {
+  id: string;
+  contract_id: string;
+  invoice_number: string;
+  taxable_amount: number | string;
+  cgst_amount: number | string;
+  sgst_amount: number | string;
+  igst_amount: number | string;
+  platform_fee: number | string;
+  total_amount: number | string;
+  pdf_url: string | null;
+  created_at: string;
+  contract_title: string;
+  deliverables: unknown;
+  contract_status: string;
+  contract_deadline: string | null;
+  signature_hash: string | null;
+  accepted_at: string | null;
+  accepted_ip: string | null;
+  terms_snapshot: Record<string, unknown> | null;
+  creator_name: string;
+  creator_handle: string;
+  creator_pan: string | null;
+  creator_gstin: string | null;
+  creator_city: string | null;
+  creator_state: string | null;
+  creator_upi: string | null;
+  agency_name: string | null;
+  agency_handle: string | null;
+  agency_pan: string | null;
+  agency_gstin: string | null;
+  agency_city: string | null;
+  agency_state: string | null;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -22,8 +57,8 @@ export async function GET(
       );
     }
 
-    // Query invoice by its own ID OR by contract_id
-    const invoiceQuery = await query(
+    // Query invoice by its own ID, contract_id, OR invoice_number
+    const invoiceQuery = await query<InvoiceDbRow>(
       `SELECT 
         i.id,
         i.contract_id,
@@ -40,6 +75,10 @@ export async function GET(
         c.deliverables,
         c.status AS contract_status,
         c.deadline AS contract_deadline,
+        c.signature_hash,
+        c.accepted_at,
+        c.accepted_ip,
+        c.terms_snapshot,
         p_creator.display_name AS creator_name,
         p_creator.handle AS creator_handle,
         p_creator.pan_number AS creator_pan,
@@ -57,7 +96,7 @@ export async function GET(
        JOIN contracts c ON i.contract_id = c.id
        JOIN profiles p_creator ON c.creator_id = p_creator.id
        LEFT JOIN profiles p_agency ON c.agency_id = p_agency.id
-       WHERE i.id::text = $1 OR i.contract_id::text = $1
+       WHERE i.id::text = $1 OR i.contract_id::text = $1 OR i.invoice_number = $1
        LIMIT 1`,
       [id]
     );
@@ -86,7 +125,7 @@ export async function GET(
       );
     }
 
-    const row = invoiceQuery.data[0] as any;
+    const row = invoiceQuery.data[0];
     const invoice = {
       id: row.id,
       contract_id: row.contract_id,
@@ -99,11 +138,20 @@ export async function GET(
       total_amount: Number(row.total_amount) || 0,
       pdf_url: row.pdf_url,
       created_at: row.created_at,
+      contract_title: row.contract_title,
+      signature_hash: row.signature_hash || null,
+      accepted_at: row.accepted_at || null,
+      accepted_ip: row.accepted_ip || null,
+      terms_snapshot: row.terms_snapshot || null,
       contract: {
         title: row.contract_title,
-        deliverables: row.deliverables,
+        deliverables: (row.deliverables as Array<{ title?: string; format?: string; rate?: number }>) || [],
         status: row.contract_status,
-        deadline: row.contract_deadline,
+        deadline: row.contract_deadline || undefined,
+        signature_hash: row.signature_hash || null,
+        accepted_at: row.accepted_at || null,
+        accepted_ip: row.accepted_ip || null,
+        terms_snapshot: row.terms_snapshot || null,
       },
       creator: {
         name: row.creator_name,

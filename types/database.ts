@@ -95,6 +95,14 @@ export interface Invoice {
   created_at: string;
 }
 
+export interface InvoiceWithAudit extends Invoice {
+  contract_title?: string;
+  signature_hash?: string | null;
+  accepted_at?: string | null;
+  accepted_ip?: string | null;
+  terms_snapshot?: Record<string, unknown> | null;
+}
+
 /**
  * Input DTO types for creation and updates
  */
