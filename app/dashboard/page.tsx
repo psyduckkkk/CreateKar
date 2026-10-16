@@ -14,7 +14,8 @@ import {
   Inbox, 
   AlertCircle,
   Calendar,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import type { Deliverable, ContractDeliverableItem, DashboardContract } from '@/types/database';
 
@@ -249,8 +250,8 @@ export default function CreatorDashboardPage() {
                 className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl transition hover:border-slate-700"
               >
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-800">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-1">
                       <span>Agency: {contract.agency_name || 'CreateKar Brand Studio'}</span>
                       <span>•</span>
@@ -259,6 +260,33 @@ export default function CreatorDashboardPage() {
                     <h2 className="text-xl font-bold text-white tracking-tight">
                       {contract.title}
                     </h2>
+
+                    {/* Cryptographic Integrity Seal */}
+                    {contract.signature_hash && ['ACCEPTED', 'IN_REVIEW', 'COMPLETED'].includes(contract.status) ? (
+                      <div className="mt-2.5 p-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 font-medium text-slate-200">
+                            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                            <span>Digitally Executed Agreement</span>
+                          </div>
+                          {(contract.accepted_at || contract.accepted_ip) && (
+                            <p className="text-slate-400 text-[11px] pl-5 sm:pl-5">
+                              {contract.accepted_at
+                                ? `Accepted on ${new Date(contract.accepted_at).toLocaleDateString('en-IN', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  })}`
+                                : ''}
+                              {contract.accepted_ip ? ` • IP: ${contract.accepted_ip}` : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="font-mono text-[11px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 self-start sm:self-auto">
+                          SHA-256: <span className="text-emerald-400">{contract.signature_hash.slice(0, 10)}...{contract.signature_hash.slice(-8)}</span>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Status Badge */}

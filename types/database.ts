@@ -60,6 +60,11 @@ export interface Contract {
   platform_fee: number;
   status: ContractStatus;
   deadline: string | null;
+  accepted_at?: string | null;
+  accepted_ip?: string | null;
+  accepted_user_agent?: string | null;
+  signature_hash?: string | null;
+  terms_snapshot?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

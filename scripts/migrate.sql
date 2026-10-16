@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS contracts (
         status IN ('DRAFT', 'PROPOSED', 'ACCEPTED', 'DECLINED', 'FUNDED', 'IN_REVIEW', 'COMPLETED', 'DISPUTED')
     ),
     deadline TIMESTAMPTZ,
+    accepted_at TIMESTAMPTZ,
+    accepted_ip VARCHAR(64),
+    accepted_user_agent TEXT,
+    signature_hash VARCHAR(64),
+    terms_snapshot JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

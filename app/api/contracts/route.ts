@@ -197,6 +197,11 @@ export async function GET(request: Request) {
         c.platform_fee,
         c.status,
         c.deadline,
+        c.accepted_at,
+        c.accepted_ip,
+        c.accepted_user_agent,
+        c.signature_hash,
+        c.terms_snapshot,
         c.created_at,
         c.updated_at,
         p_creator.display_name AS creator_name,
@@ -253,6 +258,11 @@ export async function GET(request: Request) {
       deliverable_status: c.deliverable_status || null,
       last_submitted_url: c.last_submitted_url || null,
       submitted_deliverables: c.submitted_deliverables || [],
+      accepted_at: c.accepted_at || null,
+      accepted_ip: c.accepted_ip || null,
+      accepted_user_agent: c.accepted_user_agent || null,
+      signature_hash: c.signature_hash || null,
+      terms_snapshot: c.terms_snapshot || null,
     }));
 
     return NextResponse.json({ success: true, contracts }, { status: 200 });
