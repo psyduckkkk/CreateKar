@@ -1,8 +1,5 @@
-import { neon, neonConfig } from '@neondatabase/serverless';
+import { neon } from '@neondatabase/serverless';
 import type { DbResult } from '@/types/database';
-
-// Cache connections when running in serverless environments
-neonConfig.fetchConnectionCache = true;
 
 /**
  * Helper to obtain a configured Neon SQL client using process.env.DATABASE_URL.
