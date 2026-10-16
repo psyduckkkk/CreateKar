@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { 
   BadgeCheck, 
@@ -83,6 +84,36 @@ export default function CreatorsDirectoryPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Top Navigation */}
+      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-slate-800">
+        <div className="flex items-center gap-6">
+          <Link href="/creators" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span className="text-sky-500">Create</span>Kar
+          </Link>
+          <div className="hidden sm:flex items-center gap-4 text-sm font-medium">
+            <Link 
+              href="/creators" 
+              className="text-sky-400 font-semibold"
+            >
+              Creator Directory
+            </Link>
+            <Link 
+              href="/dashboard" 
+              className="text-slate-400 hover:text-white transition"
+            >
+              Deals Inbox
+            </Link>
+          </div>
+        </div>
+
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition"
+        >
+          View Deals Inbox
+        </Link>
+      </nav>
+
       {/* Header section */}
       <header className="mb-10 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/60 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-3">

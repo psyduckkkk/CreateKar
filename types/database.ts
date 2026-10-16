@@ -9,6 +9,7 @@ export type ContractStatus =
   | 'DRAFT'
   | 'PROPOSED'
   | 'ACCEPTED'
+  | 'DECLINED'
   | 'FUNDED'
   | 'IN_REVIEW'
   | 'COMPLETED'

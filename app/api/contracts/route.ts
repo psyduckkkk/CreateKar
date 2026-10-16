@@ -179,3 +179,80 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const creatorId = searchParams.get('creator_id');
+
+    let queryText = `
+      SELECT 
+        c.id,
+        c.agency_id,
+        c.creator_id,
+        c.title,
+        c.description,
+        c.deliverables,
+        c.total_amount,
+        c.platform_fee,
+        c.status,
+        c.deadline,
+        c.created_at,
+        c.updated_at,
+        p_creator.display_name AS creator_name,
+        p_creator.handle AS creator_handle,
+        p_creator.avatar_url AS creator_avatar,
+        p_agency.display_name AS agency_name,
+        (
+          SELECT json_agg(d ORDER BY d.updated_at DESC)
+          FROM deliverables d
+          WHERE d.contract_id = c.id
+        ) AS submitted_deliverables
+      FROM contracts c
+      JOIN profiles p_creator ON c.creator_id = p_creator.id
+      LEFT JOIN profiles p_agency ON c.agency_id = p_agency.id
+    `;
+
+    const params: unknown[] = [];
+    if (creatorId) {
+      queryText += ` WHERE c.creator_id = $1`;
+      params.push(creatorId);
+    }
+
+    queryText += ` ORDER BY c.created_at DESC`;
+
+    const result = await query(queryText, params);
+
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: {
+            code: result.error.code,
+            message: result.error.message,
+          },
+        },
+        { status: 500 }
+      );
+    }
+
+    const contracts = result.data.map((c: any) => ({
+      ...c,
+      total_amount: Number(c.total_amount) || 0,
+      platform_fee: Number(c.platform_fee) || 499,
+      submitted_deliverables: c.submitted_deliverables || [],
+    }));
+
+    return NextResponse.json({ success: true, contracts }, { status: 200 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to retrieve contracts list';
+    return NextResponse.json(
+      {
+        error: {
+          code: 'SERVER_ERROR',
+          message,
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
