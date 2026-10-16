@@ -201,3 +201,86 @@ export async function GET(request: Request) {
     );
   }
 }
+
+interface PatchDeliverableBody {
+  deliverableId?: string;
+  contractId?: string;
+  status: 'REVISION_REQUESTED' | 'APPROVED';
+  revision_notes?: string;
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const body = (await request.json()) as PatchDeliverableBody;
+
+    if (!body || (!body.deliverableId && !body.contractId) || !body.status) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'deliverableId or contractId, and valid status are required.',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    let updateDeliverableResult;
+    let targetContractId = body.contractId;
+
+    if (body.deliverableId) {
+      updateDeliverableResult = await query<{ id: string; contract_id: string }>(
+        `UPDATE deliverables
+         SET status = $1, revision_notes = $2, updated_at = NOW()
+         WHERE id = $3
+         RETURNING id, contract_id`,
+        [body.status, body.revision_notes?.trim() || null, body.deliverableId]
+      );
+      if (updateDeliverableResult.success && updateDeliverableResult.data.length > 0) {
+        targetContractId = updateDeliverableResult.data[0].contract_id;
+      }
+    } else if (body.contractId) {
+      updateDeliverableResult = await query<{ id: string; contract_id: string }>(
+        `UPDATE deliverables
+         SET status = $1, revision_notes = $2, updated_at = NOW()
+         WHERE contract_id = $3 AND status = 'SUBMITTED'
+         RETURNING id, contract_id`,
+        [body.status, body.revision_notes?.trim() || null, body.contractId]
+      );
+    }
+
+    if (!updateDeliverableResult || !updateDeliverableResult.success) {
+      return NextResponse.json(
+        {
+          error: {
+            code: updateDeliverableResult?.error?.code || 'UPDATE_FAILED',
+            message: updateDeliverableResult?.error?.message || 'Failed to update deliverable.',
+          },
+        },
+        { status: 500 }
+      );
+    }
+
+    // If revision is requested, reset parent contract status to 'ACCEPTED'
+    if (body.status === 'REVISION_REQUESTED' && targetContractId) {
+      await query(
+        `UPDATE contracts SET status = 'ACCEPTED', updated_at = NOW() WHERE id = $1`,
+        [targetContractId]
+      );
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal error updating deliverable';
+    return NextResponse.json(
+      {
+        error: {
+          code: 'SERVER_ERROR',
+          message,
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
