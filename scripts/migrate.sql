@@ -20,9 +20,13 @@ CREATE TABLE IF NOT EXISTS profiles (
     gstin VARCHAR(15),
     city VARCHAR(100),
     state VARCHAR(100),
+    email VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255),
     is_verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
 
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_handle ON profiles(handle);

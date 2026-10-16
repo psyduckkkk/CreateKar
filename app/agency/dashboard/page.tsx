@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { 
   CheckCircle, 
@@ -15,7 +16,8 @@ import {
   Calendar,
   Send,
   X,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
 import type { Contract, Deliverable, ContractDeliverableItem } from '@/types/database';
 
@@ -31,10 +33,12 @@ const STATUS_FILTERS = ['All', 'Proposed', 'Active', 'In Review', 'Completed'] a
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 export default function AgencyDashboardPage() {
+  const router = useRouter();
   const [contracts, setContracts] = useState<AgencyContract[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('All');
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Tracking mutations
   const [processingContractId, setProcessingContractId] = useState<string | null>(null);
@@ -141,6 +145,21 @@ export default function AgencyDashboardPage() {
     });
   }, [contracts, activeFilter]);
 
+  // Handle Sign Out
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    const toastId = toast.loading('Signing out...');
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      toast.success('Signed out successfully.', { id: toastId });
+      router.push('/login');
+      router.refresh();
+    } catch {
+      toast.error('Error signing out', { id: toastId });
+      setIsSigningOut(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Top Navigation */}
@@ -162,14 +181,25 @@ export default function AgencyDashboardPage() {
           </div>
         </div>
 
-        <button
-          onClick={fetchContracts}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Campaigns
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={fetchContracts}
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh Campaigns</span>
+          </button>
+
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-red-400 bg-red-950/30 border border-red-900/60 hover:bg-red-900/40 hover:text-red-300 rounded-xl transition disabled:opacity-50"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </nav>
 
       {/* Header section */}

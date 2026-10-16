@@ -33,6 +33,8 @@ export interface ContractDeliverableItem {
 export interface Profile {
   id: string;
   user_id?: string;
+  email?: string | null;
+  password_hash?: string | null;
   role?: UserRole;
   display_name: string;
   handle: string;
@@ -47,6 +49,13 @@ export interface Profile {
   state?: string | null;
   is_verified?: boolean;
   created_at?: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: 'creator' | 'agency' | 'admin';
+  display_name: string;
 }
 
 export interface Contract {

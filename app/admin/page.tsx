@@ -154,9 +154,12 @@ export default function AdminOperationsPage() {
     setIsSigningOut(true);
     const toastId = toast.loading('Signing out of operations desk...');
     try {
-      await fetch('/api/admin/auth', { method: 'DELETE' });
+      await Promise.allSettled([
+        fetch('/api/auth/logout', { method: 'POST' }),
+        fetch('/api/admin/auth', { method: 'DELETE' }),
+      ]);
       toast.success('Signed out successfully.', { id: toastId });
-      router.push('/admin/login');
+      router.push('/login');
       router.refresh();
     } catch {
       toast.error('Error signing out', { id: toastId });

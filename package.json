@@ -13,6 +13,8 @@
     "@neon/config": "^1.9.2",
     "@neon/env": "^1.6.3",
     "@neondatabase/serverless": "^0.10.4",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
     "lucide-react": "^0.475.0",
     "next": "14.2.24",
     "react": "^18.3.1",
@@ -20,6 +22,7 @@
     "sonner": "^2.0.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.17.19",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
