@@ -118,3 +118,19 @@ export type CreateInvoiceInput = Omit<Invoice, 'id' | 'created_at'>;
 export type DbResult<T> =
   | { success: true; data: T }
   | { success: false; error: { code: string; message: string; details?: unknown } };
+
+export interface ContractWithDetails extends Contract {
+  creator_name: string;
+  creator_handle: string;
+  invoice_id: string | null;
+  invoice_number: string | null;
+}
+
+export interface AdminMetrics {
+  totalVolume: number;
+  totalPlatformRevenue: number;
+  activeDealsCount: number;
+  completedDealsCount: number;
+  verifiedCreatorsCount?: number;
+}
+
