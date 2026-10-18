@@ -58,6 +58,23 @@ export interface AuthUser {
   display_name: string;
 }
 
+export type PaymentStatus = 'UNPAID' | 'PAID' | 'REFUNDED' | 'FAILED';
+
+export interface PlatformPayment {
+  id: string;
+  contract_id: string;
+  agency_id: string | null;
+  fee_type: 'PLATFORM_FEE' | 'TOTAL_ESCROW';
+  amount: number;
+  currency: string;
+  razorpay_order_id: string;
+  razorpay_payment_id?: string | null;
+  razorpay_signature?: string | null;
+  status: 'CREATED' | 'CAPTURED' | 'FAILED' | 'REFUNDED';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Contract {
   id: string;
   agency_id: string;
@@ -74,6 +91,9 @@ export interface Contract {
   accepted_user_agent?: string | null;
   signature_hash?: string | null;
   terms_snapshot?: Record<string, unknown> | null;
+  payment_status?: PaymentStatus | null;
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -110,6 +130,8 @@ export interface InvoiceWithAudit extends Invoice {
   accepted_at?: string | null;
   accepted_ip?: string | null;
   terms_snapshot?: Record<string, unknown> | null;
+  razorpay_payment_id?: string | null;
+  payment_status?: PaymentStatus | null;
 }
 
 /**

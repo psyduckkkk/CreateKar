@@ -16,9 +16,13 @@ import {
   Send,
   X,
   ShieldCheck,
+  CreditCard,
+  Globe,
+  Check,
 } from 'lucide-react';
 import HeaderUserNav from '@/components/HeaderUserNav';
-import type { Contract, Deliverable, ContractDeliverableItem } from '@/types/database';
+import { loadRazorpay } from '@/lib/loadRazorpay';
+import type { Contract, Deliverable, ContractDeliverableItem, PaymentStatus } from '@/types/database';
 
 interface AgencyContract extends Contract {
   creator_name?: string;
@@ -26,6 +30,9 @@ interface AgencyContract extends Contract {
   creator_avatar?: string;
   agency_name?: string;
   submitted_deliverables?: Deliverable[];
+  payment_status?: PaymentStatus | null;
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
 }
 
 const STATUS_FILTERS = ['All', 'Proposed', 'Active', 'In Review', 'Completed'] as const;
@@ -33,6 +40,8 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 export default function AgencyDashboardPage() {
   const [contracts, setContracts] = useState<AgencyContract[]>([]);
+  const [currentUser, setCurrentUser] = useState<{ display_name: string; email: string } | null>(null);
+  const [selectedCurrencies, setSelectedCurrencies] = useState<Record<string, 'INR' | 'USD' | 'EUR'>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('All');
@@ -43,6 +52,23 @@ export default function AgencyDashboardPage() {
   // Revision state: { [contractId]: boolean } and { [contractId]: string }
   const [revisionInputsOpen, setRevisionInputsOpen] = useState<Record<string, boolean>>({});
   const [revisionNotes, setRevisionNotes] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.authenticated && data?.user) {
+            setCurrentUser(data.user);
+          }
+        }
+      } catch {
+        // Silently ignore
+      }
+    }
+    loadUser();
+  }, []);
 
   const fetchContracts = useCallback(async () => {
     setIsLoading(true);
@@ -67,6 +93,95 @@ export default function AgencyDashboardPage() {
   useEffect(() => {
     fetchContracts();
   }, [fetchContracts]);
+
+  // Handle Multi-Currency Razorpay Checkout
+  const handleInitiatePayment = async (
+    contract: AgencyContract,
+    currency: 'INR' | 'USD' | 'EUR' = 'INR'
+  ) => {
+    setProcessingContractId(contract.id);
+    const toastId = toast.loading('Initializing secure payment checkout...');
+
+    try {
+      const rzpLoaded = await loadRazorpay();
+      if (!rzpLoaded) {
+        toast.error('Unable to load payment gateway SDK.', { id: toastId });
+        return;
+      }
+
+      const orderRes = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractId: contract.id,
+          feeType: 'PLATFORM_FEE',
+          currency,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        throw new Error(orderData?.error?.message || 'Failed to initialize payment order.');
+      }
+
+      toast.dismiss(toastId);
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'CreateKar',
+        description: 'Agency Platform Convenience Fee (₹499) - Zero Creator Commission',
+        order_id: orderData.orderId,
+        prefill: {
+          name: currentUser?.display_name || '',
+          email: currentUser?.email || '',
+        },
+        theme: { color: '#0F172A' },
+        handler: async function (paymentResponse: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) {
+          const verifyToast = toast.loading('Verifying transaction...');
+          try {
+            const verifyRes = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: paymentResponse.razorpay_order_id,
+                paymentId: paymentResponse.razorpay_payment_id,
+                signature: paymentResponse.razorpay_signature,
+                contractId: contract.id,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
+              toast.success('Payment completed successfully! Platform fee settled.', { id: verifyToast });
+              await fetchContracts();
+            } else {
+              toast.error(verifyData?.error || 'Payment verification failed', { id: verifyToast });
+            }
+          } catch {
+            toast.error('Network error during verification', { id: verifyToast });
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            toast.info('Payment window closed. Fee remains pending.');
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error initiating payment.';
+      toast.error(msg, { id: toastId });
+    } finally {
+      setProcessingContractId(null);
+    }
+  };
 
   // Handle Approve & Settle
   const handleApprove = async (contractId: string) => {
@@ -313,8 +428,21 @@ export default function AgencyDashboardPage() {
                     ) : null}
                   </div>
 
-                  {/* Status Badge */}
-                  <div>
+                  {/* Status & Payment Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Payment Status Badge */}
+                    {contract.payment_status === 'PAID' || contract.razorpay_payment_id ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                        Fee Paid
+                      </span>
+                    ) : contract.status !== 'DECLINED' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
+                        <CreditCard className="w-3.5 h-3.5 text-amber-400" />
+                        Fee Pending
+                      </span>
+                    ) : null}
+
                     {contract.status === 'PROPOSED' && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
                         <Clock className="w-3.5 h-3.5" />
@@ -386,6 +514,74 @@ export default function AgencyDashboardPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Platform Fee Checkout Card if unpaid and not declined */}
+                {contract.payment_status !== 'PAID' && !contract.razorpay_payment_id && contract.status !== 'DECLINED' && (
+                  <div className="mt-4 p-4 rounded-xl bg-slate-950/70 border border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-300">
+                        <CreditCard className="w-4 h-4 text-amber-400" />
+                        <span>Platform Convenience Fee Checkout</span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Flat ₹499 agency convenience fee for digital contract execution & automated GST invoices.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                      {/* Currency Toggle */}
+                      <div className="inline-flex items-center p-0.5 bg-slate-900 border border-slate-800 rounded-lg text-xs">
+                        {(['INR', 'USD', 'EUR'] as const).map((curr) => {
+                          const activeCurr = selectedCurrencies[contract.id] || 'INR';
+                          const isCurrActive = activeCurr === curr;
+                          return (
+                            <button
+                              key={curr}
+                              type="button"
+                              onClick={() =>
+                                setSelectedCurrencies((prev) => ({ ...prev, [contract.id]: curr }))
+                              }
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                                isCurrActive
+                                  ? 'bg-sky-600 text-white shadow-sm'
+                                  : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              {curr}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Pay Button */}
+                      <button
+                        type="button"
+                        disabled={isProcessing}
+                        onClick={() =>
+                          handleInitiatePayment(
+                            contract,
+                            selectedCurrencies[contract.id] || 'INR'
+                          )
+                        }
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-sky-950/40 transition disabled:opacity-50"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Processing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>
+                              Pay {selectedCurrencies[contract.id] === 'USD' ? '$6 USD' : selectedCurrencies[contract.id] === 'EUR' ? '€6 EUR' : '₹499 INR'}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Action Section */}
                 <div className="pt-4">

@@ -9,7 +9,8 @@ import {
   ArrowLeft, 
   CheckCircle, 
   Loader2, 
-  AlertCircle 
+  AlertCircle,
+  CreditCard 
 } from 'lucide-react';
 
 interface InvoiceData {
@@ -27,6 +28,8 @@ interface InvoiceData {
   accepted_at?: string | null;
   accepted_ip?: string | null;
   terms_snapshot?: Record<string, unknown> | null;
+  payment_status?: string | null;
+  razorpay_payment_id?: string | null;
   contract: {
     title: string;
     deliverables: Array<{ title?: string; format?: string; rate?: number }>;
@@ -300,16 +303,61 @@ export default function InvoicePage() {
 
         {/* Summary Breakdown */}
         <div className="pt-8 flex flex-col sm:flex-row justify-between gap-8">
-          <div className="text-xs text-slate-500 print:text-slate-600 max-w-sm space-y-2">
-            <p className="font-semibold text-slate-300 print:text-black uppercase tracking-wider">
-              Settlement Notes
-            </p>
-            <p>
-              Digital content production services rendered under Indian Goods and Services Tax standard service accounting code (SAC 9983).
-            </p>
-            <p>
-              Creator remuneration settled directly with 0% platform take rate. Flat ₹499 agency transaction processing fee applied.
-            </p>
+          <div className="text-xs text-slate-500 print:text-slate-600 max-w-sm space-y-3">
+            <div>
+              <p className="font-semibold text-slate-300 print:text-black uppercase tracking-wider mb-1">
+                Settlement Notes
+              </p>
+              <p>
+                Digital content production services rendered under Indian Goods and Services Tax standard service accounting code (SAC 9983).
+              </p>
+              <p className="mt-1">
+                Creator remuneration settled directly with 0% platform take rate. Flat ₹499 agency transaction processing fee applied.
+              </p>
+            </div>
+
+            {/* Razorpay Settlement Record */}
+            {invoice.razorpay_payment_id && (
+              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl print:bg-slate-50 print:border-slate-300">
+                <div className="flex items-center gap-1.5 font-semibold text-slate-300 print:text-black mb-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-sky-400 print:text-black" />
+                  <span>Payment & Settlement Details</span>
+                </div>
+                <div className="space-y-1 text-[11px] text-slate-400 print:text-slate-700">
+                  <div className="flex justify-between gap-2">
+                    <span>Transaction ID:</span>
+                    <span className="font-mono text-slate-200 print:text-black select-all">
+                      {invoice.razorpay_payment_id}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span>Payment Mode:</span>
+                    <span className="text-slate-200 print:text-black">
+                      Razorpay (UPI / Netbanking / Cards)
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span>Settlement Status:</span>
+                    <span className="text-emerald-400 print:text-black font-semibold">
+                      CAPTURED / VERIFIED
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span>Timestamp:</span>
+                    <span className="text-slate-200 print:text-black">
+                      {new Date(invoice.created_at).toLocaleString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Asia/Kolkata',
+                      })} IST
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="w-full sm:w-72 space-y-2 text-sm">

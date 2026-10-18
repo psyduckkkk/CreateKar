@@ -23,6 +23,8 @@ interface InvoiceDbRow {
   accepted_at: string | null;
   accepted_ip: string | null;
   terms_snapshot: Record<string, unknown> | null;
+  payment_status: string | null;
+  razorpay_payment_id: string | null;
   creator_name: string;
   creator_handle: string;
   creator_pan: string | null;
@@ -79,6 +81,8 @@ export async function GET(
         c.accepted_at,
         c.accepted_ip,
         c.terms_snapshot,
+        c.payment_status,
+        c.razorpay_payment_id,
         p_creator.display_name AS creator_name,
         p_creator.handle AS creator_handle,
         p_creator.pan_number AS creator_pan,
@@ -143,6 +147,8 @@ export async function GET(
       accepted_at: row.accepted_at || null,
       accepted_ip: row.accepted_ip || null,
       terms_snapshot: row.terms_snapshot || null,
+      payment_status: row.payment_status || 'PAID',
+      razorpay_payment_id: row.razorpay_payment_id || null,
       contract: {
         title: row.contract_title,
         deliverables: (row.deliverables as Array<{ title?: string; format?: string; rate?: number }>) || [],

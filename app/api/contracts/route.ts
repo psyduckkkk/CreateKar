@@ -205,6 +205,9 @@ export async function GET(request: Request) {
         c.accepted_user_agent,
         c.signature_hash,
         c.terms_snapshot,
+        c.payment_status,
+        c.razorpay_order_id,
+        c.razorpay_payment_id,
         c.created_at,
         c.updated_at,
         p_creator.display_name AS creator_name,
@@ -281,6 +284,9 @@ export async function GET(request: Request) {
       accepted_user_agent: c.accepted_user_agent || null,
       signature_hash: c.signature_hash || null,
       terms_snapshot: c.terms_snapshot || null,
+      payment_status: c.payment_status || 'UNPAID',
+      razorpay_order_id: c.razorpay_order_id || null,
+      razorpay_payment_id: c.razorpay_payment_id || null,
     }));
 
     return NextResponse.json({ success: true, contracts }, { status: 200 });
