@@ -53,7 +53,7 @@ export default function HeaderUserNav() {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-24 h-7 bg-ledger/60 animate-pulse rounded-md" />
+        <div className="w-24 h-8 bg-dark-surface animate-pulse rounded-xl border border-dark-border" />
       </div>
     );
   }
@@ -63,15 +63,15 @@ export default function HeaderUserNav() {
       <div className="flex items-center gap-2 text-xs">
         <Link
           href="/login"
-          className="px-3.5 py-1.5 font-medium text-ink bg-paper border border-ledger hover:border-ink rounded-md transition-colors"
+          className="px-3.5 py-1.5 font-medium text-slate-300 hover:text-white bg-dark-surface border border-dark-border hover:border-slate-600 rounded-xl transition duration-150"
         >
           Sign In
         </Link>
         <Link
           href="/signup"
-          className="px-3.5 py-1.5 font-medium text-paper bg-ink hover:bg-black rounded-md transition-colors"
+          className="px-3.5 py-1.5 font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition duration-150 shadow-md shadow-indigo-950/50"
         >
-          Open Account
+          Get Started
         </Link>
       </div>
     );
@@ -86,21 +86,21 @@ export default function HeaderUserNav() {
 
   const roleBadgeStyle =
     user.role === 'admin'
-      ? 'bg-seal-light border border-seal/30 text-seal'
+      ? 'bg-indigo-950/80 border border-indigo-500/40 text-indigo-300'
       : user.role === 'agency'
-      ? 'bg-pine-light border border-pine/30 text-pine'
-      : 'bg-paper border border-ledger text-ink-muted';
+      ? 'bg-violet-950/80 border border-violet-500/40 text-violet-300'
+      : 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-300';
 
   return (
     <div className="flex items-center gap-2 sm:gap-2.5 text-xs">
       {/* User Info & Role Badge */}
-      <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md bg-white border border-ledger">
-        <User className="w-3.5 h-3.5 text-ink-muted" />
-        <span className="font-medium text-ink max-w-[130px] truncate">
+      <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border">
+        <User className="w-3.5 h-3.5 text-indigo-400" />
+        <span className="font-medium text-slate-200 max-w-[130px] truncate">
           {user.display_name}
         </span>
         <span
-          className={`px-1.5 py-0.5 text-[10px] font-mono font-medium rounded-sm uppercase tracking-wider ${roleBadgeStyle}`}
+          className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full uppercase tracking-wider ${roleBadgeStyle}`}
         >
           {roleLabel}
         </span>
@@ -110,9 +110,9 @@ export default function HeaderUserNav() {
       <Link
         href="/settings"
         title="Account & Tax Settings"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-ink bg-white border border-ledger hover:border-ink rounded-md transition-colors"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-slate-300 hover:text-white bg-dark-surface border border-dark-border hover:border-slate-600 rounded-xl transition duration-150"
       >
-        <Settings className="w-3.5 h-3.5 text-ink-muted" />
+        <Settings className="w-3.5 h-3.5 text-slate-400" />
         <span className="hidden sm:inline">Settings</span>
       </Link>
 
@@ -121,7 +121,7 @@ export default function HeaderUserNav() {
         onClick={handleSignOut}
         disabled={isSigningOut}
         title="Sign Out"
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 font-medium text-ink-muted bg-white border border-ledger hover:text-seal hover:border-seal/40 rounded-md transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 font-medium text-slate-400 hover:text-red-400 bg-dark-surface border border-dark-border hover:border-red-900/50 rounded-xl transition duration-150 disabled:opacity-50"
       >
         <LogOut className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Sign Out</span>

@@ -15,6 +15,7 @@ import {
   RefreshCw, 
   Search, 
   AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import HeaderUserNav from '@/components/HeaderUserNav';
 import { CreateKarLogo } from '@/components/Logo';
@@ -148,25 +149,25 @@ export default function AdminOperationsPage() {
   }, [deals, dealStatusFilter, searchQuery]);
 
   return (
-    <main className="min-h-screen bg-paper text-ink py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-dark text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto selection:bg-indigo-500/30 selection:text-indigo-300">
       {/* Top Navigation */}
-      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-ledger">
+      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-dark-border">
         <div className="flex items-center gap-6">
           <CreateKarLogo size="md" href="/" />
-          <div className="hidden sm:flex items-center gap-5 text-xs font-mono uppercase tracking-wider">
-            <Link href="/creators" className="text-ink-muted hover:text-ink transition">
-              Registry
+          <div className="hidden sm:flex items-center gap-6 text-sm font-medium text-slate-300">
+            <Link href="/creators" className="hover:text-white transition">
+              Creators
             </Link>
-            <Link href="/dashboard" className="text-ink-muted hover:text-ink transition">
+            <Link href="/dashboard" className="hover:text-white transition">
               Creator Desk
             </Link>
-            <Link href="/agency/dashboard" className="text-ink-muted hover:text-ink transition">
+            <Link href="/agency/dashboard" className="hover:text-white transition">
               Agency Desk
             </Link>
-            <Link href="/admin" className="text-ink font-bold border-b border-ink pb-0.5">
+            <Link href="/admin" className="text-white font-semibold border-b-2 border-indigo-500 pb-1">
               Admin Desk
             </Link>
-            <Link href="/settings" className="text-ink-muted hover:text-ink transition">
+            <Link href="/settings" className="hover:text-white transition">
               Settings
             </Link>
           </div>
@@ -176,7 +177,7 @@ export default function AdminOperationsPage() {
           <button
             onClick={loadAdminData}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-ink bg-white border border-ledger hover:border-ink rounded-md transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-dark-surface border border-dark-border hover:border-slate-700 hover:text-white rounded-xl transition disabled:opacity-50"
             title="Refresh Desk"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -189,77 +190,77 @@ export default function AdminOperationsPage() {
 
       {/* Header section */}
       <header className="mb-8 text-left">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-seal-light border border-seal/30 text-seal text-[11px] font-mono uppercase tracking-widest font-semibold mb-2">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Platform Operations Desk • Sovereign Ledger Governance</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-3">
+          <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Platform Operations & Governance Desk</span>
         </div>
-        <h1 className="text-3xl font-bold font-display tracking-tight text-ink">
+        <h1 className="text-3xl font-extrabold font-display tracking-tight text-white">
           Operations & Commercial Governance
         </h1>
-        <p className="mt-1 text-ink-muted text-sm max-w-2xl font-sans">
-          Audit creator identity credentials, inspect platform contract gross settlement volume, and monitor automated GST invoice records.
+        <p className="mt-1 text-slate-400 text-sm max-w-2xl font-sans">
+          Review creator identity verifications, inspect platform contract gross settlement volume, and monitor automated GST invoice records.
         </p>
       </header>
 
       {/* 4 Metric Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {/* Total Volume */}
-        <div className="bg-white border border-ledger rounded-md p-5 shadow-sm">
-          <div className="flex items-center justify-between text-ink-muted mb-2 font-mono text-[10px] uppercase tracking-wider">
-            <span>Gross Contract Volume</span>
-            <TrendingUp className="w-4 h-4 text-seal" />
+        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Gross Contract Volume</span>
+            <TrendingUp className="w-4 h-4 text-indigo-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-ink tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">
             ₹{metrics.totalVolume.toLocaleString('en-IN')}
           </div>
-          <p className="text-[11px] font-mono text-ink-muted mt-1">Total commercial contract values</p>
+          <p className="text-xs text-slate-500 mt-1">Total commercial contract values</p>
         </div>
 
         {/* Platform Revenue */}
-        <div className="bg-white border border-ledger rounded-md p-5 shadow-sm">
-          <div className="flex items-center justify-between text-ink-muted mb-2 font-mono text-[10px] uppercase tracking-wider">
-            <span>Treasury Revenue</span>
-            <CreditCard className="w-4 h-4 text-pine" />
+        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Platform Revenue</span>
+            <CreditCard className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-pine tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 tracking-tight">
             ₹{metrics.totalPlatformRevenue.toLocaleString('en-IN')}
           </div>
-          <p className="text-[11px] font-mono text-ink-muted mt-1">₹499 statutory fee per completed brief</p>
+          <p className="text-xs text-slate-500 mt-1">₹499 flat fee per completed deal</p>
         </div>
 
         {/* Active Deals */}
-        <div className="bg-white border border-ledger rounded-md p-5 shadow-sm">
-          <div className="flex items-center justify-between text-ink-muted mb-2 font-mono text-[10px] uppercase tracking-wider">
-            <span>Active Contracts</span>
-            <FileText className="w-4 h-4 text-ink-muted" />
+        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Active Deals</span>
+            <FileText className="w-4 h-4 text-violet-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-ink tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">
             {metrics.activeDealsCount}
           </div>
-          <p className="text-[11px] font-mono text-ink-muted mt-1">In proposal, active, or audit stages</p>
+          <p className="text-xs text-slate-500 mt-1">In proposal, active, or review stages</p>
         </div>
 
         {/* Verified Creators */}
-        <div className="bg-white border border-ledger rounded-md p-5 shadow-sm">
-          <div className="flex items-center justify-between text-ink-muted mb-2 font-mono text-[10px] uppercase tracking-wider">
-            <span>Verified Registry</span>
-            <Users className="w-4 h-4 text-ink-muted" />
+        <div className="bg-dark-surface border border-dark-border rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Verified Creators</span>
+            <Users className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-ink tracking-tight">
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">
             {metrics.verifiedCreatorsCount ?? creators.filter((c) => c.is_verified).length}
           </div>
-          <p className="text-[11px] font-mono text-ink-muted mt-1">Accredited creators in registry</p>
+          <p className="text-xs text-slate-500 mt-1">Approved creators in directory</p>
         </div>
       </section>
 
       {/* Main Tabs Navigation */}
-      <div className="border-b border-ledger mb-6 flex items-center gap-6">
+      <div className="border-b border-dark-border mb-6 flex items-center gap-6">
         <button
           onClick={() => setActiveTab('verifications')}
-          className={`pb-3 text-xs font-mono uppercase tracking-wider transition border-b-2 ${
+          className={`pb-3 text-sm font-semibold transition border-b-2 ${
             activeTab === 'verifications'
-              ? 'border-ink text-ink font-bold'
-              : 'border-transparent text-ink-muted hover:text-ink'
+              ? 'border-indigo-500 text-white'
+              : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
           Creator Verifications ({creators.length})
@@ -267,10 +268,10 @@ export default function AdminOperationsPage() {
 
         <button
           onClick={() => setActiveTab('deals')}
-          className={`pb-3 text-xs font-mono uppercase tracking-wider transition border-b-2 ${
+          className={`pb-3 text-sm font-semibold transition border-b-2 ${
             activeTab === 'deals'
-              ? 'border-ink text-ink font-bold'
-              : 'border-transparent text-ink-muted hover:text-ink'
+              ? 'border-indigo-500 text-white'
+              : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
           Commercial Deals ({deals.length})
@@ -280,95 +281,95 @@ export default function AdminOperationsPage() {
       {/* Loading & Error States */}
       {isLoading && creators.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center">
-          <Loader2 className="w-8 h-8 text-seal animate-spin mb-4" />
-          <p className="text-ink-muted text-xs font-mono uppercase tracking-wider">Accessing governance records...</p>
+          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
+          <p className="text-slate-400 text-sm">Loading governance records...</p>
         </div>
       ) : errorMessage ? (
-        <div className="py-16 px-6 bg-seal-light border border-seal/30 rounded-md text-center max-w-lg mx-auto">
-          <AlertCircle className="w-8 h-8 text-seal mx-auto mb-3" />
-          <h3 className="text-lg font-bold font-display text-ink">Query Exception</h3>
-          <p className="text-xs font-mono text-ink-muted mt-1 mb-5">{errorMessage}</p>
+        <div className="py-16 px-6 bg-red-950/30 border border-red-900/50 rounded-2xl text-center max-w-lg mx-auto">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-display text-white">Error Loading Data</h3>
+          <p className="text-sm text-slate-400 mt-1 mb-5">{errorMessage}</p>
           <button
             onClick={loadAdminData}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-dark-elevated hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Retry Query
+            Retry
           </button>
         </div>
       ) : activeTab === 'verifications' ? (
         /* TAB 1: CREATOR VERIFICATIONS */
-        <div className="bg-white border border-ledger rounded-md overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-ledger flex items-center justify-between">
-            <h2 className="text-xs font-mono uppercase tracking-wider font-bold text-ink">
-              Creator Identity & Verification Registry
+        <div className="bg-dark-surface border border-dark-border rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-dark-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">
+              Creator Identity & Verification Status
             </h2>
-            <span className="text-[11px] font-mono text-ink-muted">
-              Only verified creators appear in the public discovery registry
+            <span className="text-xs text-slate-400">
+              Only verified creators appear in the public discovery directory
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-ledger text-[10px] uppercase tracking-wider text-ink-muted bg-paper">
-                  <th className="py-3 px-4 font-bold">Creator</th>
-                  <th className="py-3 px-4 font-bold">Niche</th>
-                  <th className="py-3 px-4 font-bold">PAN Number</th>
-                  <th className="py-3 px-4 font-bold">UPI ID</th>
-                  <th className="py-3 px-4 font-bold text-right">Base Rate</th>
-                  <th className="py-3 px-4 font-bold text-center">Status</th>
-                  <th className="py-3 px-4 font-bold text-right">Action</th>
+                <tr className="border-b border-dark-border text-xs uppercase tracking-wider text-slate-400 bg-dark/60">
+                  <th className="py-3.5 px-5 font-semibold">Creator</th>
+                  <th className="py-3.5 px-4 font-semibold">Niche</th>
+                  <th className="py-3.5 px-4 font-semibold">PAN Number</th>
+                  <th className="py-3.5 px-4 font-semibold">UPI ID</th>
+                  <th className="py-3.5 px-4 font-semibold text-right">Base Rate</th>
+                  <th className="py-3.5 px-4 font-semibold text-center">Status</th>
+                  <th className="py-3.5 px-5 font-semibold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ledger">
+              <tbody className="divide-y divide-dark-border">
                 {creators.map((creator) => {
                   const isMutating = mutatingCreatorId === creator.id;
                   const isVerified = Boolean(creator.is_verified);
 
                   return (
-                    <tr key={creator.id} className="hover:bg-paper/60 transition">
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-ink font-sans text-sm">{creator.display_name}</div>
-                        <div className="text-[11px] text-ink-muted">@{creator.handle.replace(/^@/, '')}</div>
+                    <tr key={creator.id} className="hover:bg-dark-elevated/40 transition">
+                      <td className="py-4 px-5">
+                        <div className="font-semibold text-white">{creator.display_name}</div>
+                        <div className="text-xs text-slate-400">@{creator.handle.replace(/^@/, '')}</div>
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] uppercase font-bold bg-paper text-ink border border-ledger">
+                      <td className="py-4 px-4">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-dark-elevated text-slate-300 border border-dark-border">
                           {creator.niche || 'General'}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-ink-muted">
-                        {creator.pan_number || '—'}
+                      <td className="py-4 px-4 font-mono text-xs text-slate-300">
+                        {creator.pan_number || 'Not Provided'}
                       </td>
-                      <td className="py-3 px-4 text-ink-muted">
-                        {creator.upi_id || '—'}
+                      <td className="py-4 px-4 font-mono text-xs text-slate-300">
+                        {creator.upi_id || 'Not Provided'}
                       </td>
-                      <td className="py-3 px-4 text-right font-bold text-ink">
+                      <td className="py-4 px-4 text-right font-mono font-bold text-white">
                         ₹{Number(creator.starting_rate || 0).toLocaleString('en-IN')}
                       </td>
-                      <td className="py-3 px-4 text-center">
+                      <td className="py-4 px-4 text-center">
                         {isVerified ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-pine-light text-pine border border-pine/30">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/60">
                             <Check className="w-3 h-3" />
                             Verified
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-seal-light text-seal border border-seal/30">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/60">
                             Pending
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-4 px-5 text-right">
                         {isVerified ? (
                           <button
                             onClick={() => handleToggleVerification(creator, false)}
                             disabled={isMutating}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider font-bold text-ink-muted hover:text-seal border border-ledger hover:border-seal rounded-md transition disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-red-400 bg-dark-elevated hover:bg-slate-800 rounded-xl transition disabled:opacity-50"
                           >
                             {isMutating ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                              <X className="w-3 h-3" />
+                              <X className="w-3.5 h-3.5" />
                             )}
                             <span>Revoke</span>
                           </button>
@@ -376,14 +377,14 @@ export default function AdminOperationsPage() {
                           <button
                             onClick={() => handleToggleVerification(creator, true)}
                             disabled={isMutating}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider font-bold text-white bg-pine hover:bg-pine/90 rounded-md transition disabled:opacity-50 shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition disabled:opacity-50 shadow-md shadow-indigo-950/50"
                           >
                             {isMutating ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                              <Check className="w-3 h-3" />
+                              <Check className="w-3.5 h-3.5" />
                             )}
-                            <span>Accredit</span>
+                            <span>Verify</span>
                           </button>
                         )}
                       </td>
@@ -396,20 +397,20 @@ export default function AdminOperationsPage() {
         </div>
       ) : (
         /* TAB 2: COMMERCIAL DEALS */
-        <div className="bg-white border border-ledger rounded-md overflow-hidden shadow-sm">
+        <div className="bg-dark-surface border border-dark-border rounded-2xl overflow-hidden shadow-xl">
           {/* Controls: search and status filter pills */}
-          <div className="p-4 border-b border-ledger flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <div className="p-5 border-b border-dark-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
               {(['All', 'Proposed', 'Accepted', 'In Review', 'Completed'] as const).map((filter) => {
                 const isActive = dealStatusFilter === filter;
                 return (
                   <button
                     key={filter}
                     onClick={() => setDealStatusFilter(filter)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                       isActive
-                        ? 'bg-ink text-paper border border-ink font-bold shadow-sm'
-                        : 'bg-white text-ink-muted border border-ledger hover:text-ink hover:border-ink'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'bg-dark-elevated text-slate-400 hover:text-white border border-dark-border'
                     }`}
                   >
                     {filter}
@@ -419,34 +420,34 @@ export default function AdminOperationsPage() {
             </div>
 
             <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search deals or creators..."
-                className="w-full pl-9 pr-3 py-1.5 bg-paper border border-ledger rounded-md text-xs font-mono text-ink placeholder:text-ink-muted/50 focus:outline-none focus:border-ink"
+                className="w-full pl-9 pr-3 py-1.5 bg-dark border border-dark-border rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-ledger text-[10px] uppercase tracking-wider text-ink-muted bg-paper">
-                  <th className="py-3 px-4 font-bold">Deal Title</th>
-                  <th className="py-3 px-4 font-bold">Creator</th>
-                  <th className="py-3 px-4 font-bold text-right">Deal Value</th>
-                  <th className="py-3 px-4 font-bold text-right">Platform Fee</th>
-                  <th className="py-3 px-4 font-bold text-center">Status</th>
-                  <th className="py-3 px-4 font-bold text-center">Invoice</th>
-                  <th className="py-3 px-4 font-bold text-right">Recorded Date</th>
+                <tr className="border-b border-dark-border text-xs uppercase tracking-wider text-slate-400 bg-dark/60">
+                  <th className="py-3.5 px-5 font-semibold">Deal Title</th>
+                  <th className="py-3.5 px-4 font-semibold">Creator</th>
+                  <th className="py-3.5 px-4 font-semibold text-right">Deal Value</th>
+                  <th className="py-3.5 px-4 font-semibold text-right">Platform Fee</th>
+                  <th className="py-3.5 px-4 font-semibold text-center">Status</th>
+                  <th className="py-3.5 px-4 font-semibold text-center">Invoice</th>
+                  <th className="py-3.5 px-5 font-semibold text-right">Created Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ledger">
+              <tbody className="divide-y divide-dark-border">
                 {filteredDeals.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-ink-muted text-xs">
+                    <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
                       No commercial records matching specified query.
                     </td>
                   </tr>
@@ -459,61 +460,61 @@ export default function AdminOperationsPage() {
                     });
 
                     return (
-                      <tr key={deal.id} className="hover:bg-paper/60 transition">
-                        <td className="py-3 px-4">
-                          <div className="font-bold text-ink font-sans text-sm">{deal.title}</div>
+                      <tr key={deal.id} className="hover:bg-dark-elevated/40 transition">
+                        <td className="py-4 px-5">
+                          <div className="font-semibold text-white">{deal.title}</div>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="text-ink font-medium">{deal.creator_name}</div>
-                          <div className="text-[11px] text-ink-muted">@{deal.creator_handle.replace(/^@/, '')}</div>
+                        <td className="py-4 px-4">
+                          <div className="text-slate-200 font-medium">{deal.creator_name}</div>
+                          <div className="text-xs text-slate-500">@{deal.creator_handle.replace(/^@/, '')}</div>
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-ink">
+                        <td className="py-4 px-4 text-right font-mono font-bold text-white">
                           ₹{Number(deal.total_amount).toLocaleString('en-IN')}
                         </td>
-                        <td className="py-3 px-4 text-right text-ink-muted">
+                        <td className="py-4 px-4 text-right font-mono text-slate-300">
                           ₹{Number(deal.platform_fee).toLocaleString('en-IN')}
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-4 px-4 text-center">
                           {deal.status === 'PROPOSED' && (
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-paper text-ink border border-ledger">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/60">
                               Proposed
                             </span>
                           )}
                           {deal.status === 'ACCEPTED' && (
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-pine-light text-pine border border-pine/30">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-800/60">
                               Accepted
                             </span>
                           )}
                           {deal.status === 'IN_REVIEW' && (
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-paper text-ink border border-ink">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-950/70 text-violet-300 border border-violet-800/60">
                               In Review
                             </span>
                           )}
                           {deal.status === 'COMPLETED' && (
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-pine-light text-pine border border-pine/30">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/60">
                               Completed
                             </span>
                           )}
                           {deal.status === 'DECLINED' && (
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-paper text-ink-muted border border-ledger">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-dark-elevated text-slate-400 border border-dark-border">
                               Declined
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-4 px-4 text-center">
                           {deal.status === 'COMPLETED' ? (
                             <Link
                               href={`/invoices/${deal.id}`}
-                              className="inline-flex items-center gap-1 text-[11px] text-seal hover:underline font-bold"
+                              className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
                             >
                               <FileText className="w-3.5 h-3.5" />
                               <span>{deal.invoice_number || 'View Invoice'}</span>
                             </Link>
                           ) : (
-                            <span className="text-xs text-ink-muted">—</span>
+                            <span className="text-xs text-slate-600">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-right text-[11px] text-ink-muted">
+                        <td className="py-4 px-5 text-right text-xs text-slate-400 font-mono">
                           {formattedDate}
                         </td>
                       </tr>

@@ -1,6 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="4" fill="#0B0F14"/>
-  <polygon points="9,3 23,3 29,9 29,23 23,29 9,29 3,23 3,9" fill="#0B0F14" stroke="#FBFBF9" stroke-width="1.2"/>
-  <path d="M12 11H8V21H12" stroke="#FBFBF9" stroke-width="2.5" stroke-linecap="square"/>
-  <path d="M15 11V21M22 11L15 16L22 21" stroke="#C83220" stroke-width="2.5" stroke-linecap="square"/>
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#11141D"/>
+  <rect width="32" height="32" rx="8" stroke="#232838" stroke-width="1"/>
+  <path d="M13 11H9.5C8.67157 11 8 11.6716 8 12.5V19.5C8 20.3284 8.67157 21 9.5 21H13" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M17 10V22" stroke="url(#ck-grad)" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M23 11L17.5 16.5L23.5 22" stroke="url(#ck-grad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="ck-grad" x1="17" y1="10" x2="23.5" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
 </svg>

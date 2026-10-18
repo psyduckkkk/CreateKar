@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,32 +10,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: '#FBFBF9',
-        ink: {
-          DEFAULT: '#0B0F14',
-          muted: '#4A5568',
+        dark: {
+          DEFAULT: '#090B10',
+          surface: '#11141D',
+          elevated: '#171B26',
+          border: '#232838',
+          hover: '#1C2232',
         },
-        ledger: '#E2E2DC',
-        seal: {
-          DEFAULT: '#C83220',
-          hover: '#A82615',
-          light: '#FDF2F0',
-        },
-        pine: {
-          DEFAULT: '#144234',
-          light: '#EBF3F0',
+        brand: {
+          DEFAULT: '#6366F1',
+          hover: '#4F46E5',
+          light: '#EEF2FF',
+          dark: '#312E81',
+          glow: 'rgba(99, 102, 241, 0.25)',
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'sans-serif'],
-        sans: ['var(--font-sans)', 'sans-serif'],
+        display: ['var(--font-display)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
-      },
-      borderRadius: {
-        sm: '2px',
-        DEFAULT: '4px',
-        md: '6px',
-        lg: '8px',
       },
     },
   },

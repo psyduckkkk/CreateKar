@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { ShieldCheck, Lock, Key, Loader2 } from 'lucide-react';
+import { ShieldCheck, Lock, Key, Loader2, Sparkles } from 'lucide-react';
 import { CreateKarLogo } from '@/components/Logo';
 
 export default function AdminLoginPage() {
@@ -61,36 +61,39 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-paper text-ink flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen bg-dark text-slate-100 flex flex-col items-center justify-center p-4 relative selection:bg-indigo-500/30 selection:text-indigo-300">
+      {/* Subtle background glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+
       {/* Brand Navigation */}
-      <div className="mb-8">
+      <div className="mb-8 relative z-10">
         <CreateKarLogo size="lg" href="/" />
       </div>
 
       {/* Login Card */}
-      <div className="max-w-md w-full bg-white border border-ledger rounded-md p-8 sm:p-10 shadow-sm">
-        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-seal-light border border-seal/30 text-seal text-[10px] font-mono uppercase tracking-widest font-semibold mb-3">
-          <ShieldCheck className="w-3 h-3" />
-          <span>Operations Governance Gate</span>
+      <div className="max-w-md w-full bg-dark-surface border border-dark-border rounded-2xl p-8 sm:p-10 shadow-2xl relative z-10">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-4">
+          <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Operations Security Gate</span>
         </div>
 
-        <h1 className="text-2xl font-bold font-display tracking-tight text-ink mb-1">
+        <h1 className="text-2xl font-bold font-display tracking-tight text-white mb-2">
           CreateKar Operations Access
         </h1>
-        <p className="text-sm font-sans text-ink-muted mb-6">
-          Supply administrative secret key to unlock governance desk and verify creator credentials.
+        <p className="text-sm font-sans text-slate-400 mb-6">
+          Enter the administrative secret key to unlock the platform governance desk and manage creator verifications.
         </p>
 
         {errorMessage && (
-          <div className="mb-5 p-3 rounded-md bg-seal-light border border-seal/30 text-seal text-xs font-mono flex items-center gap-2">
-            <Lock className="w-3.5 h-3.5 text-seal flex-shrink-0" />
+          <div className="mb-5 p-3 rounded-xl bg-red-950/40 border border-red-900/60 text-red-200 text-xs flex items-center gap-2">
+            <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
               Secret Passkey
             </label>
             <div
@@ -98,7 +101,7 @@ export default function AdminLoginPage() {
                 isShaking ? '-translate-x-1.5 translate-x-1.5' : ''
               }`}
             >
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                 <Lock className="w-4 h-4" />
               </div>
               <input
@@ -112,10 +115,10 @@ export default function AdminLoginPage() {
                   if (errorMessage) setErrorMessage(null);
                 }}
                 placeholder="Enter Operations Secret Key"
-                className={`w-full pl-10 pr-4 py-2.5 bg-paper border rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition ${
+                className={`w-full pl-10 pr-4 py-2.5 bg-dark border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition ${
                   errorMessage || isShaking
-                    ? 'border-seal ring-1 ring-seal'
-                    : 'border-ledger focus:border-ink'
+                    ? 'border-red-500 ring-2 ring-red-500/30'
+                    : 'border-dark-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50'
                 }`}
               />
             </div>
@@ -124,24 +127,24 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isSubmitting || !password.trim()}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-ink hover:bg-black text-paper text-xs font-mono uppercase tracking-wider font-bold rounded-md shadow-sm transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-950/60 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-seal" />
-                <span>Verifying Authorization...</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Verifying Access...</span>
               </>
             ) : (
               <>
-                <Key className="w-3.5 h-3.5" />
+                <Key className="w-4 h-4" />
                 <span>Unlock Operations Desk</span>
               </>
             )}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-[11px] font-mono text-ink-muted">
-          Restricted administrative jurisdiction. Authorized personnel only.
+        <p className="mt-6 text-center text-xs text-slate-500">
+          Restricted administrative zone. Authorized CreateKar personnel only.
         </p>
       </div>
     </main>

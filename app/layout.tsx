@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
 
-const spaceGrotesk = Space_Grotesk({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['600', '700', '800'],
   variable: '--font-display',
   display: 'swap',
 });
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap',
 });
@@ -25,8 +25,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CreateKar - Sovereign Commercial Infrastructure for Creators & Agencies',
-  description: 'Direct bilateral contracts, zero percent platform commission, automated GST compliance, and court-admissible SHA-256 digital execution seals.',
+  title: 'CreateKar — Premium Commercial Dealflow for Creators & Brands',
+  description: 'Direct bilateral contracts, 0% creator commission, automated GST compliance, and cryptographic SHA-256 execution seals.',
   icons: {
     icon: '/icon.svg',
   },
@@ -38,20 +38,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} bg-paper text-ink font-sans antialiased min-h-screen selection:bg-seal-light selection:text-seal`}
+        className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable} bg-dark text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500/30 selection:text-indigo-300`}
       >
         {children}
         <Toaster
           position="top-right"
-          theme="light"
+          theme="dark"
           toastOptions={{
             style: {
-              background: '#FFFFFF',
-              color: '#0B0F14',
-              border: '1px solid #E2E2DC',
-              borderRadius: '6px',
+              background: '#11141D',
+              color: '#F8FAFC',
+              border: '1px solid #232838',
+              borderRadius: '12px',
               fontFamily: 'var(--font-sans)',
             },
           }}

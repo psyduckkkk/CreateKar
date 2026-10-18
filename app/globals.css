@@ -3,31 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --background: #FBFBF9;
-  --foreground: #0B0F14;
+  --background: #090B10;
+  --foreground: #F8FAFC;
 }
 
 body {
-  color: #0B0F14;
-  background-color: #FBFBF9;
+  color: #F8FAFC;
+  background-color: #090B10;
   min-height: 100vh;
 }
 
-/* Custom scrollbars matching the ledger */
+/* Custom modern scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FBFBF9;
+  background: #090B10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E2E2DC;
-  border-radius: 2px;
+  background: #232838;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4A5568;
+  background: #6366F1;
 }
