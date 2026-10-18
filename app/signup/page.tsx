@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { User, Building, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Building, Mail, Lock, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
+import { CreateKarLogo } from '@/components/Logo';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function SignupPage() {
 
     setIsLoading(true);
     setErrorMessage(null);
-    const toastId = toast.loading('Creating your account...');
+    const toastId = toast.loading('Registering entity to ledger...');
 
     try {
       const response = await fetch('/api/auth/signup', {
@@ -46,7 +47,7 @@ export default function SignupPage() {
           email: email.trim(),
           handle: handle.trim(),
           password,
-          niche: niche.trim() || (role === 'creator' ? 'General Creator' : 'Brand Studio'),
+          niche: niche.trim() || (role === 'creator' ? 'General Commercial' : 'Brand Studio'),
         }),
       });
 
@@ -59,7 +60,7 @@ export default function SignupPage() {
         return;
       }
 
-      toast.success('Account created successfully!', { id: toastId });
+      toast.success('Registration completed', { id: toastId });
 
       // Route to appropriate dashboard
       const targetPath = role === 'creator' ? '/dashboard' : '/agency/dashboard';
@@ -75,27 +76,29 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 py-12">
+    <main className="min-h-screen bg-paper text-ink flex flex-col items-center justify-center p-4 sm:p-6 py-12">
       {/* Brand Navigation */}
       <div className="mb-8">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <span className="text-sky-500">Create</span>Kar
-        </Link>
+        <CreateKarLogo size="lg" href="/" />
       </div>
 
       {/* Signup Card */}
-      <div className="max-w-lg w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-10 shadow-2xl">
+      <div className="max-w-lg w-full bg-white border border-ledger rounded-md p-8 sm:p-10 shadow-sm">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Create Your Account
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-seal-light border border-seal/30 text-seal text-[10px] font-mono uppercase tracking-widest font-semibold mb-2.5">
+            <ShieldCheck className="w-3 h-3" />
+            <span>Commercial Registration Protocol</span>
+          </div>
+          <h1 className="text-2xl font-bold font-display tracking-tight text-ink">
+            Register Party on Ledger
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Join CreateKar to collaborate on verified creator brand campaigns.
+          <p className="text-sm text-ink-muted mt-1 font-sans">
+            Enroll as an independent creator or contracting agency under the standard commercial agreement.
           </p>
         </header>
 
         {errorMessage && (
-          <div className="mb-5 p-3 rounded-xl bg-red-950/40 border border-red-900/60 text-red-200 text-xs animate-in fade-in">
+          <div className="mb-5 p-3 rounded-md bg-seal-light border border-seal/30 text-seal text-xs font-mono">
             {errorMessage}
           </div>
         )}
@@ -103,43 +106,43 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Role Selection */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-2">
-              Select Account Type
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-2">
+              Select Legal Party Role
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setRole('creator')}
-                className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+                className={`p-3.5 rounded-md border text-left transition flex flex-col gap-1 ${
                   role === 'creator'
-                    ? 'border-sky-500 bg-sky-950/40 text-white ring-1 ring-sky-500/50'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                    ? 'border-ink bg-paper text-ink ring-1 ring-ink'
+                    : 'border-ledger bg-white text-ink-muted hover:border-ink/60 hover:text-ink'
                 }`}
               >
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <User className={`w-4 h-4 ${role === 'creator' ? 'text-sky-400' : 'text-slate-400'}`} />
-                  <span>Creator</span>
+                <div className="flex items-center gap-2 font-mono font-bold text-xs uppercase tracking-wider">
+                  <User className={`w-3.5 h-3.5 ${role === 'creator' ? 'text-seal' : 'text-ink-muted'}`} />
+                  <span>Independent Creator</span>
                 </div>
-                <span className="text-[11px] text-slate-400 leading-snug">
-                  Publish content & receive direct payouts
+                <span className="text-[11px] text-ink-muted leading-snug font-sans">
+                  Execute brand briefs & receive direct UPI settlements
                 </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setRole('agency')}
-                className={`p-3.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+                className={`p-3.5 rounded-md border text-left transition flex flex-col gap-1 ${
                   role === 'agency'
-                    ? 'border-sky-500 bg-sky-950/40 text-white ring-1 ring-sky-500/50'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                    ? 'border-ink bg-paper text-ink ring-1 ring-ink'
+                    : 'border-ledger bg-white text-ink-muted hover:border-ink/60 hover:text-ink'
                 }`}
               >
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Building className={`w-4 h-4 ${role === 'agency' ? 'text-sky-400' : 'text-slate-400'}`} />
-                  <span>Brand / Agency</span>
+                <div className="flex items-center gap-2 font-mono font-bold text-xs uppercase tracking-wider">
+                  <Building className={`w-3.5 h-3.5 ${role === 'agency' ? 'text-seal' : 'text-ink-muted'}`} />
+                  <span>Contracting Agency</span>
                 </div>
-                <span className="text-[11px] text-slate-400 leading-snug">
-                  Hire verified creators & manage deals
+                <span className="text-[11px] text-ink-muted leading-snug font-sans">
+                  Commission creators & issue legally binding briefs
                 </span>
               </button>
             </div>
@@ -147,11 +150,11 @@ export default function SignupPage() {
 
           {/* Full Name */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">
-              {role === 'creator' ? 'Full Name' : 'Company / Agency Name'}
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+              {role === 'creator' ? 'Full Legal Name' : 'Company / Entity Registered Name'}
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
                 {role === 'creator' ? <User className="w-4 h-4" /> : <Building className="w-4 h-4" />}
               </div>
               <input
@@ -160,19 +163,19 @@ export default function SignupPage() {
                 disabled={isLoading}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder={role === 'creator' ? 'Priya Menon' : 'Acme Brand Studio'}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition disabled:opacity-50"
+                placeholder={role === 'creator' ? 'Priya Menon' : 'Acme Media Pvt Ltd'}
+                className="w-full pl-10 pr-4 py-2.5 bg-paper border border-ledger focus:border-ink rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Public Handle */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">
-              Public Handle
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+              Identifier Handle
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-mono text-xs">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted font-mono text-xs">
                 @
               </div>
               <input
@@ -181,19 +184,19 @@ export default function SignupPage() {
                 disabled={isLoading}
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
-                placeholder={role === 'creator' ? 'priyastyle' : 'acmebrand'}
-                className="w-full pl-8 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition disabled:opacity-50"
+                placeholder={role === 'creator' ? 'priyastyle' : 'acmemedia'}
+                className="w-full pl-8 pr-4 py-2.5 bg-paper border border-ledger focus:border-ink rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Email Address */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">
-              Work Email Address
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+              Official Email Address
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
                 <Mail className="w-4 h-4" />
               </div>
               <input
@@ -202,34 +205,34 @@ export default function SignupPage() {
                 disabled={isLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@domain.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition disabled:opacity-50"
+                placeholder="officer@domain.com"
+                className="w-full pl-10 pr-4 py-2.5 bg-paper border border-ledger focus:border-ink rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Niche or Focus Area */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">
-              {role === 'creator' ? 'Primary Niche' : 'Industry Focus'}
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+              {role === 'creator' ? 'Primary Commercial Sector' : 'Industry Focus'}
             </label>
             <input
               type="text"
               disabled={isLoading}
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
-              placeholder={role === 'creator' ? 'Fashion, Tech, Fitness, Lifestyle' : 'D2C Consumer, Fintech, SaaS'}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition disabled:opacity-50"
+              placeholder={role === 'creator' ? 'Tech, Fashion, Fitness, Lifestyle' : 'D2C Consumer, Fintech, Enterprise'}
+              className="w-full px-3.5 py-2.5 bg-paper border border-ledger focus:border-ink rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition disabled:opacity-50"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 uppercase tracking-wider mb-1.5">
-              Password (Min 8 Characters)
+            <label className="block text-xs font-mono font-medium text-ink-muted uppercase tracking-wider mb-1.5">
+              Passkey (Min 8 Characters)
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
                 <Lock className="w-4 h-4" />
               </div>
               <input
@@ -238,8 +241,8 @@ export default function SignupPage() {
                 disabled={isLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none transition disabled:opacity-50"
+                placeholder="••••••••••••"
+                className="w-full pl-10 pr-4 py-2.5 bg-paper border border-ledger focus:border-ink rounded-md text-sm text-ink placeholder:text-ink-muted/50 focus:outline-none font-mono transition disabled:opacity-50"
               />
             </div>
           </div>
@@ -247,26 +250,26 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading || !displayName.trim() || !email.trim() || !handle.trim() || password.length < 8}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-950/50 transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 bg-ink hover:bg-black text-paper text-xs font-mono uppercase tracking-wider font-bold rounded-md transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating Account...</span>
+                <Loader2 className="w-4 h-4 animate-spin text-seal" />
+                <span>Recording Entity...</span>
               </>
             ) : (
               <>
-                <span>Create Account & Continue</span>
+                <span>Execute Enrollment</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-400">
-          <span>Already have an account? </span>
-          <Link href="/login" className="text-sky-400 hover:text-sky-300 font-medium underline">
-            Log In
+        <div className="mt-8 pt-6 border-t border-ledger text-center text-xs font-mono text-ink-muted">
+          <span>Already registered? </span>
+          <Link href="/login" className="text-seal hover:underline font-bold">
+            Access Authenticated Desk
           </Link>
         </div>
       </div>

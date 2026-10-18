@@ -7,11 +7,12 @@ import {
   ShieldCheck, 
   Printer, 
   ArrowLeft, 
-  CheckCircle, 
+  Check, 
   Loader2, 
   AlertCircle,
   CreditCard 
 } from 'lucide-react';
+import { CreateKarLogo } from '@/components/Logo';
 
 interface InvoiceData {
   id: string;
@@ -114,28 +115,28 @@ export default function InvoicePage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 text-sky-500 animate-spin mb-4" />
-        <p className="text-slate-400 text-sm">Loading commercial invoice...</p>
+      <main className="min-h-screen bg-paper text-ink flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-seal animate-spin mb-4" />
+        <p className="text-ink-muted text-xs font-mono uppercase tracking-wider">Accessing tax invoice record...</p>
       </main>
     );
   }
 
   if (errorMessage || !invoice) {
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-        <div className="bg-red-950/20 border border-red-900/50 rounded-2xl p-8 max-w-md text-center">
-          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
-          <h2 className="text-lg font-semibold text-white">Invoice Not Found</h2>
-          <p className="text-sm text-slate-400 mt-2 mb-6">
-            {errorMessage || 'The requested commercial invoice is not available.'}
+      <main className="min-h-screen bg-paper text-ink flex flex-col items-center justify-center p-6">
+        <div className="bg-seal-light border border-seal/30 rounded-md p-8 max-w-md text-center">
+          <AlertCircle className="w-8 h-8 text-seal mx-auto mb-3" />
+          <h2 className="text-lg font-bold font-display text-ink">Tax Invoice Not Located</h2>
+          <p className="text-xs font-mono text-ink-muted mt-2 mb-6">
+            {errorMessage || 'The requested commercial invoice is not found on the platform ledger.'}
           </p>
           <Link
             href="/agency/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Dashboard</span>
+            <span>Return to Desk</span>
           </Link>
         </div>
       </main>
@@ -159,141 +160,144 @@ export default function InvoicePage() {
   const acceptedIp = invoice.accepted_ip || invoice.contract?.accepted_ip || 'Recorded via verified session';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white print:text-black">
+    <div className="min-h-screen bg-paper text-ink py-10 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white print:text-black">
       {/* Top action bar: hidden when printing */}
       <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between print:hidden">
         <Link
           href="/agency/dashboard"
-          className="text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-1.5"
+          className="text-xs font-mono uppercase tracking-wider text-ink-muted hover:text-ink transition flex items-center gap-1.5"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Return to Dashboard</span>
+          <span>Return to Desk</span>
         </Link>
 
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-sky-950/40 transition active:scale-[0.98]"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper text-xs font-mono uppercase tracking-wider font-bold rounded-md shadow-sm transition active:scale-[0.98]"
         >
           <Printer className="w-4 h-4" />
-          <span>Print / Save PDF</span>
+          <span>Print Tax Invoice (PDF)</span>
         </button>
       </div>
 
       {/* Invoice Document Canvas */}
-      <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl print:border-none print:shadow-none print:bg-white print:text-black print:p-0 print:max-w-none">
+      <div className="max-w-4xl mx-auto bg-white border border-ledger rounded-md p-8 sm:p-12 shadow-sm print:border-none print:shadow-none print:bg-white print:text-black print:p-0 print:max-w-none">
         {/* Document Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-8 border-b border-slate-800 print:border-slate-300">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 pb-8 border-b border-ledger print:border-ink">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2 print:border-slate-400 print:bg-slate-100 print:text-black">
-              <CheckCircle className="w-3.5 h-3.5" />
-              Settled & Finalized
+            <div className="flex items-center gap-3 mb-2">
+              <CreateKarLogo size="md" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-pine-light border border-pine/30 text-pine text-[10px] font-mono uppercase tracking-widest font-bold print:border-black print:bg-transparent print:text-black">
+                <Check className="w-3 h-3" />
+                Settled & Audited
+              </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white print:text-black">
-              CreateKar Commercial Invoice
+            <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-ink print:text-black">
+              Official Tax Invoice
             </h1>
-            <p className="text-sm text-slate-400 mt-1 print:text-slate-600">
-              Tax invoice for verified digital creator deliverables
+            <p className="text-xs font-mono uppercase tracking-wider text-ink-muted mt-1 print:text-black">
+              SAC Code 9983 • Indian Commercial Jurisdiction
             </p>
           </div>
 
-          <div className="text-left sm:text-right">
-            <span className="block text-xs uppercase tracking-wider text-slate-500 print:text-slate-600">
-              Invoice Number
+          <div className="text-left sm:text-right font-mono">
+            <span className="block text-[10px] uppercase tracking-wider text-ink-muted print:text-black">
+              Invoice Serial Number
             </span>
-            <span className="text-lg font-mono font-bold text-sky-400 print:text-black">
+            <span className="text-lg font-bold text-ink print:text-black">
               {invoice.invoice_number}
             </span>
-            <span className="block text-xs uppercase tracking-wider text-slate-500 mt-2 print:text-slate-600">
+            <span className="block text-[10px] uppercase tracking-wider text-ink-muted mt-2 print:text-black">
               Date of Issue
             </span>
-            <span className="text-sm font-medium text-slate-300 print:text-black">
+            <span className="text-xs font-bold text-ink print:text-black">
               {issueDate}
             </span>
           </div>
         </div>
 
         {/* Parties: Supplier (Creator) & Recipient (Agency) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 py-8 border-b border-slate-800 print:border-slate-300 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 py-8 border-b border-ledger print:border-ink text-xs font-mono">
           {/* Supplier (Creator) */}
-          <div className="space-y-1.5">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-sky-400 print:text-slate-700">
-              Supplier (Creator)
+          <div className="space-y-1">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-seal print:text-black">
+              Supplier (Contracted Creator)
             </span>
-            <p className="text-base font-bold text-white print:text-black">
+            <p className="text-sm font-bold font-display text-ink print:text-black">
               {invoice.creator.name}
             </p>
-            <p className="text-slate-400 print:text-slate-700">{invoice.creator.handle}</p>
-            <p className="text-slate-400 print:text-slate-700">
-              PAN: <span className="font-mono text-slate-200 print:text-black">{invoice.creator.pan || 'PAN Verified on file'}</span>
+            <p className="text-ink-muted print:text-black">@{invoice.creator.handle.replace(/^@/, '')}</p>
+            <p className="text-ink-muted print:text-black">
+              PAN: <span className="font-bold text-ink print:text-black">{invoice.creator.pan || 'PAN Verified on file'}</span>
             </p>
-            <p className="text-slate-400 print:text-slate-700">
-              GSTIN: <span className="font-mono text-slate-200 print:text-black">{invoice.creator.gstin || 'Unregistered / Exempt Under Threshold'}</span>
+            <p className="text-ink-muted print:text-black">
+              GSTIN: <span className="font-bold text-ink print:text-black">{invoice.creator.gstin || 'Unregistered / Exempt Under Threshold'}</span>
             </p>
-            <p className="text-slate-400 print:text-slate-700">
-              Location: {invoice.creator.city || 'Bengaluru'}, {invoice.creator.state || 'Karnataka'}
+            <p className="text-ink-muted print:text-black">
+              Jurisdiction: {invoice.creator.city || 'Bengaluru'}, {invoice.creator.state || 'Karnataka'}
             </p>
             {invoice.creator.upi && (
-              <p className="text-xs text-slate-500 print:text-slate-600">
-                Settlement UPI: {invoice.creator.upi}
+              <p className="text-[11px] text-ink-muted print:text-black">
+                UPI Settlement Endpoint: {invoice.creator.upi}
               </p>
             )}
           </div>
 
           {/* Recipient (Agency) */}
-          <div className="space-y-1.5 sm:text-right">
-            <span className="block text-xs font-semibold uppercase tracking-wider text-sky-400 print:text-slate-700">
-              Billed To (Agency / Brand)
+          <div className="space-y-1 sm:text-right">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-seal print:text-black">
+              Billed To (Contracting Agency)
             </span>
-            <p className="text-base font-bold text-white print:text-black">
+            <p className="text-sm font-bold font-display text-ink print:text-black">
               {invoice.agency.name}
             </p>
-            <p className="text-slate-400 print:text-slate-700">{invoice.agency.handle}</p>
-            <p className="text-slate-400 print:text-slate-700">
-              PAN: <span className="font-mono text-slate-200 print:text-black">{invoice.agency.pan || 'AAACK1234F'}</span>
+            <p className="text-ink-muted print:text-black">@{invoice.agency.handle.replace(/^@/, '')}</p>
+            <p className="text-ink-muted print:text-black">
+              PAN: <span className="font-bold text-ink print:text-black">{invoice.agency.pan || 'AAACK1234F'}</span>
             </p>
-            <p className="text-slate-400 print:text-slate-700">
-              GSTIN: <span className="font-mono text-slate-200 print:text-black">{invoice.agency.gstin || '29AAACK1234F1Z5'}</span>
+            <p className="text-ink-muted print:text-black">
+              GSTIN: <span className="font-bold text-ink print:text-black">{invoice.agency.gstin || '29AAACK1234F1Z5'}</span>
             </p>
-            <p className="text-slate-400 print:text-slate-700">
-              Location: {invoice.agency.city || 'Bengaluru'}, {invoice.agency.state || 'Karnataka'}
+            <p className="text-ink-muted print:text-black">
+              Registered Office: {invoice.agency.city || 'Bengaluru'}, {invoice.agency.state || 'Karnataka'}
             </p>
           </div>
         </div>
 
         {/* Deliverables Table */}
-        <div className="py-8 border-b border-slate-800 print:border-slate-300">
-          <table className="w-full text-left text-sm">
+        <div className="py-8 border-b border-ledger print:border-ink">
+          <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-800 print:border-slate-300 text-xs uppercase tracking-wider text-slate-400 print:text-slate-700">
-                <th className="py-3 font-semibold">Service Description</th>
-                <th className="py-3 font-semibold text-center">SAC Code</th>
-                <th className="py-3 font-semibold text-right">Taxable Base</th>
-                <th className="py-3 font-semibold text-right">CGST (9%)</th>
-                <th className="py-3 font-semibold text-right">SGST (9%)</th>
-                <th className="py-3 font-semibold text-right">Total Amount</th>
+              <tr className="border-y border-ink text-[10px] uppercase tracking-wider text-ink bg-paper print:bg-transparent">
+                <th className="py-2.5 px-2 font-bold">Service Classification & Deliverables</th>
+                <th className="py-2.5 px-2 font-bold text-center">SAC Code</th>
+                <th className="py-2.5 px-2 font-bold text-right">Taxable Base</th>
+                <th className="py-2.5 px-2 font-bold text-right">CGST (9%)</th>
+                <th className="py-2.5 px-2 font-bold text-right">SGST (9%)</th>
+                <th className="py-2.5 px-2 font-bold text-right">Gross Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 print:divide-slate-200">
+            <tbody className="divide-y divide-ledger print:divide-ink">
               <tr>
-                <td className="py-4 font-medium text-white print:text-black">
-                  <div>{invoice.contract.title}</div>
-                  <div className="text-xs text-slate-400 print:text-slate-600 mt-0.5">
+                <td className="py-4 px-2">
+                  <div className="font-bold font-sans text-sm text-ink print:text-black">{invoice.contract.title}</div>
+                  <div className="text-[11px] text-ink-muted print:text-black mt-0.5">
                     {deliverableName}
                   </div>
                 </td>
-                <td className="py-4 text-center font-mono text-slate-300 print:text-black">
+                <td className="py-4 px-2 text-center font-bold text-ink print:text-black">
                   9983
                 </td>
-                <td className="py-4 text-right font-medium text-slate-200 print:text-black">
+                <td className="py-4 px-2 text-right font-medium text-ink print:text-black">
                   ₹{invoice.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 text-right text-slate-300 print:text-black">
+                <td className="py-4 px-2 text-right text-ink print:text-black">
                   ₹{invoice.cgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 text-right text-slate-300 print:text-black">
+                <td className="py-4 px-2 text-right text-ink print:text-black">
                   ₹{invoice.sgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-4 text-right font-bold text-white print:text-black">
+                <td className="py-4 px-2 text-right font-bold text-ink print:text-black">
                   ₹{invoice.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </td>
               </tr>
@@ -303,48 +307,48 @@ export default function InvoicePage() {
 
         {/* Summary Breakdown */}
         <div className="pt-8 flex flex-col sm:flex-row justify-between gap-8">
-          <div className="text-xs text-slate-500 print:text-slate-600 max-w-sm space-y-3">
+          <div className="text-xs font-mono text-ink-muted max-w-sm space-y-3">
             <div>
-              <p className="font-semibold text-slate-300 print:text-black uppercase tracking-wider mb-1">
-                Settlement Notes
+              <p className="font-bold text-ink uppercase tracking-wider mb-1 text-[10px]">
+                Statutory Settlement Notes
               </p>
-              <p>
-                Digital content production services rendered under Indian Goods and Services Tax standard service accounting code (SAC 9983).
+              <p className="leading-relaxed">
+                Services rendered under Indian GST Service Accounting Code SAC 9983 (Other professional, technical and business services).
               </p>
-              <p className="mt-1">
-                Creator remuneration settled directly with 0% platform take rate. Flat ₹499 agency transaction processing fee applied.
+              <p className="mt-1 leading-relaxed">
+                Zero creator deduction platform model. Agency convenience fee fixed at ₹499 flat statutory charge.
               </p>
             </div>
 
             {/* Razorpay Settlement Record */}
             {invoice.razorpay_payment_id && (
-              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl print:bg-slate-50 print:border-slate-300">
-                <div className="flex items-center gap-1.5 font-semibold text-slate-300 print:text-black mb-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-sky-400 print:text-black" />
-                  <span>Payment & Settlement Details</span>
+              <div className="p-3 bg-paper border border-ledger rounded-md">
+                <div className="flex items-center gap-1.5 font-bold text-ink text-[11px] uppercase tracking-wider mb-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-seal" />
+                  <span>Settlement Transaction Record</span>
                 </div>
-                <div className="space-y-1 text-[11px] text-slate-400 print:text-slate-700">
+                <div className="space-y-1 text-[11px] text-ink-muted">
                   <div className="flex justify-between gap-2">
-                    <span>Transaction ID:</span>
-                    <span className="font-mono text-slate-200 print:text-black select-all">
+                    <span>Payment ID:</span>
+                    <span className="font-mono text-ink font-bold select-all">
                       {invoice.razorpay_payment_id}
                     </span>
                   </div>
                   <div className="flex justify-between gap-2">
-                    <span>Payment Mode:</span>
-                    <span className="text-slate-200 print:text-black">
+                    <span>Gateway Mode:</span>
+                    <span className="text-ink">
                       Razorpay (UPI / Netbanking / Cards)
                     </span>
                   </div>
                   <div className="flex justify-between gap-2">
                     <span>Settlement Status:</span>
-                    <span className="text-emerald-400 print:text-black font-semibold">
+                    <span className="text-pine font-bold uppercase">
                       CAPTURED / VERIFIED
                     </span>
                   </div>
                   <div className="flex justify-between gap-2">
-                    <span>Timestamp:</span>
-                    <span className="text-slate-200 print:text-black">
+                    <span>Recorded Timestamp:</span>
+                    <span className="text-ink">
                       {new Date(invoice.created_at).toLocaleString('en-IN', {
                         day: 'numeric',
                         month: 'short',
@@ -360,38 +364,38 @@ export default function InvoicePage() {
             )}
           </div>
 
-          <div className="w-full sm:w-72 space-y-2 text-sm">
-            <div className="flex justify-between text-slate-400 print:text-slate-700">
+          <div className="w-full sm:w-80 space-y-2 text-xs font-mono">
+            <div className="flex justify-between text-ink-muted">
               <span>Taxable Value:</span>
-              <span className="font-medium text-slate-200 print:text-black">
+              <span className="font-medium text-ink">
                 ₹{invoice.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
 
-            <div className="flex justify-between text-slate-400 print:text-slate-700">
+            <div className="flex justify-between text-ink-muted">
               <span>CGST (9.0%):</span>
-              <span className="font-medium text-slate-200 print:text-black">
+              <span className="font-medium text-ink">
                 ₹{invoice.cgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
 
-            <div className="flex justify-between text-slate-400 print:text-slate-700">
+            <div className="flex justify-between text-ink-muted">
               <span>SGST (9.0%):</span>
-              <span className="font-medium text-slate-200 print:text-black">
+              <span className="font-medium text-ink">
                 ₹{invoice.sgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
 
-            <div className="flex justify-between text-slate-400 print:text-slate-700">
+            <div className="flex justify-between text-ink-muted">
               <span>Platform Fee:</span>
-              <span className="font-medium text-slate-200 print:text-black">
+              <span className="font-medium text-ink">
                 ₹{invoice.platform_fee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 print:border-slate-300 flex justify-between text-base font-bold text-white print:text-black">
-              <span>Total Paid:</span>
-              <span className="text-sky-400 print:text-black text-lg">
+            <div className="pt-3 border-t border-ink flex justify-between text-base font-bold text-ink">
+              <span>Total Payable:</span>
+              <span className="text-lg">
                 ₹{invoice.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -399,37 +403,37 @@ export default function InvoicePage() {
         </div>
 
         {/* Digital Contract Execution & Integrity Record */}
-        <div className="border border-slate-200 bg-slate-50/70 rounded-md p-4 mt-8 text-xs text-slate-600 print:bg-white print:border-slate-300 print:break-inside-avoid">
-          <div className="flex items-center gap-2 font-bold text-slate-900 mb-3">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 print:text-black flex-shrink-0" />
-            <span className="text-sm tracking-tight">Cryptographic Proof of Execution</span>
+        <div className="border border-ledger bg-paper rounded-md p-4 mt-8 text-xs font-mono text-ink print:bg-white print:border-ledger print:break-inside-avoid">
+          <div className="flex items-center gap-2 font-bold text-ink mb-3 text-xs uppercase tracking-wider">
+            <ShieldCheck className="w-4 h-4 text-seal flex-shrink-0" />
+            <span>Digital Execution & Cryptographic Hash Seal</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <span className="block font-semibold text-slate-700 mb-0.5">Execution Timestamp:</span>
-              <span className="text-slate-800">
+              <span className="block text-[10px] uppercase text-ink-muted mb-0.5">Execution Timestamp:</span>
+              <span className="text-ink font-bold">
                 {formatExecutionTimestamp(acceptedAt)}
               </span>
             </div>
 
             <div>
-              <span className="block font-semibold text-slate-700 mb-0.5">Signatory IP / Network Origin:</span>
-              <span className="font-mono text-slate-800">
+              <span className="block text-[10px] uppercase text-ink-muted mb-0.5">Signatory Origin IP:</span>
+              <span className="font-mono text-ink font-bold">
                 {acceptedIp}
               </span>
             </div>
 
             <div className="sm:col-span-2">
-              <span className="block font-semibold text-slate-700 mb-1">SHA-256 Hash:</span>
-              <code className="block font-mono break-all text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded select-all">
+              <span className="block text-[10px] uppercase text-ink-muted mb-1">SHA-256 Evidentiary Digest:</span>
+              <code className="block font-mono break-all text-ink bg-white border border-ledger px-2 py-1.5 rounded-sm select-all font-bold">
                 {signatureHash || 'PENDING_DIGITAL_EXECUTION'}
               </code>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-200 print:border-slate-300">
-            This invoice corresponds to an electronically executed commercial contract. The SHA-256 digest mathematically guarantees contract terms have remained unaltered since acceptance.
+          <p className="text-[10px] text-ink-muted pt-2 border-t border-ledger">
+            This instrument certifies an electronically executed commercial contract. The SHA-256 digest mathematically guarantees contract terms remain immutable and authentic under the Information Technology Act, 2000.
           </p>
         </div>
       </div>

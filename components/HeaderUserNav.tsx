@@ -53,19 +53,25 @@ export default function HeaderUserNav() {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-20 h-6 bg-slate-800 animate-pulse rounded-full" />
+        <div className="w-24 h-7 bg-ledger/60 animate-pulse rounded-md" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 text-xs">
         <Link
           href="/login"
-          className="px-3.5 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition shadow-md shadow-sky-950/40"
+          className="px-3.5 py-1.5 font-medium text-ink bg-paper border border-ledger hover:border-ink rounded-md transition-colors"
         >
           Sign In
+        </Link>
+        <Link
+          href="/signup"
+          className="px-3.5 py-1.5 font-medium text-paper bg-ink hover:bg-black rounded-md transition-colors"
+        >
+          Open Account
         </Link>
       </div>
     );
@@ -80,21 +86,21 @@ export default function HeaderUserNav() {
 
   const roleBadgeStyle =
     user.role === 'admin'
-      ? 'bg-emerald-950/80 border-emerald-800 text-emerald-400'
+      ? 'bg-seal-light border border-seal/30 text-seal'
       : user.role === 'agency'
-      ? 'bg-indigo-950/80 border-indigo-800 text-indigo-400'
-      : 'bg-sky-950/80 border-sky-800 text-sky-400';
+      ? 'bg-pine-light border border-pine/30 text-pine'
+      : 'bg-paper border border-ledger text-ink-muted';
 
   return (
-    <div className="flex items-center gap-2.5 sm:gap-3 text-xs">
+    <div className="flex items-center gap-2 sm:gap-2.5 text-xs">
       {/* User Info & Role Badge */}
-      <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800">
-        <User className="w-3.5 h-3.5 text-slate-400" />
-        <span className="font-medium text-slate-200 max-w-[130px] truncate">
+      <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-md bg-white border border-ledger">
+        <User className="w-3.5 h-3.5 text-ink-muted" />
+        <span className="font-medium text-ink max-w-[130px] truncate">
           {user.display_name}
         </span>
         <span
-          className={`px-2 py-0.5 text-[10px] font-semibold border rounded-full uppercase tracking-wider ${roleBadgeStyle}`}
+          className={`px-1.5 py-0.5 text-[10px] font-mono font-medium rounded-sm uppercase tracking-wider ${roleBadgeStyle}`}
         >
           {roleLabel}
         </span>
@@ -103,10 +109,10 @@ export default function HeaderUserNav() {
       {/* Quick link to Profile Settings */}
       <Link
         href="/settings"
-        title="Profile Settings"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition"
+        title="Account & Tax Settings"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-ink bg-white border border-ledger hover:border-ink rounded-md transition-colors"
       >
-        <Settings className="w-3.5 h-3.5 text-slate-400" />
+        <Settings className="w-3.5 h-3.5 text-ink-muted" />
         <span className="hidden sm:inline">Settings</span>
       </Link>
 
@@ -115,7 +121,7 @@ export default function HeaderUserNav() {
         onClick={handleSignOut}
         disabled={isSigningOut}
         title="Sign Out"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-red-400 bg-red-950/30 border border-red-900/60 hover:bg-red-900/40 hover:text-red-300 rounded-xl transition disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 font-medium text-ink-muted bg-white border border-ledger hover:text-seal hover:border-seal/40 rounded-md transition-colors disabled:opacity-50"
       >
         <LogOut className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Sign Out</span>

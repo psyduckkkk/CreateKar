@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { 
-  CheckCircle, 
+  Check, 
   ExternalLink, 
   FileText, 
   Clock, 
@@ -14,13 +14,12 @@ import {
   Inbox, 
   Calendar,
   Send,
-  X,
   ShieldCheck,
   CreditCard,
-  Globe,
-  Check,
+  ArrowRight
 } from 'lucide-react';
 import HeaderUserNav from '@/components/HeaderUserNav';
+import { CreateKarLogo } from '@/components/Logo';
 import { loadRazorpay } from '@/lib/loadRazorpay';
 import type { Contract, Deliverable, ContractDeliverableItem, PaymentStatus } from '@/types/database';
 
@@ -100,7 +99,7 @@ export default function AgencyDashboardPage() {
     currency: 'INR' | 'USD' | 'EUR' = 'INR'
   ) => {
     setProcessingContractId(contract.id);
-    const toastId = toast.loading('Initializing secure payment checkout...');
+    const toastId = toast.loading('Initializing gateway checkout...');
 
     try {
       const rzpLoaded = await loadRazorpay();
@@ -137,7 +136,7 @@ export default function AgencyDashboardPage() {
           name: currentUser?.display_name || '',
           email: currentUser?.email || '',
         },
-        theme: { color: '#0F172A' },
+        theme: { color: '#0B0F14' },
         handler: async function (paymentResponse: {
           razorpay_payment_id: string;
           razorpay_order_id: string;
@@ -157,7 +156,7 @@ export default function AgencyDashboardPage() {
             });
             const verifyData = await verifyRes.json();
             if (verifyRes.ok && verifyData.success) {
-              toast.success('Payment completed successfully! Platform fee settled.', { id: verifyToast });
+              toast.success('Payment completed successfully. Platform fee settled.', { id: verifyToast });
               await fetchContracts();
             } else {
               toast.error(verifyData?.error || 'Payment verification failed', { id: verifyToast });
@@ -258,24 +257,22 @@ export default function AgencyDashboardPage() {
   }, [contracts, activeFilter]);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-paper text-ink py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Top Navigation */}
-      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-slate-800">
+      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-ledger">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <span className="text-sky-500">Create</span>Kar
-          </Link>
-          <div className="hidden sm:flex items-center gap-4 text-sm font-medium">
-            <Link href="/creators" className="text-slate-400 hover:text-white transition">
-              Creator Directory
+          <CreateKarLogo size="md" href="/" />
+          <div className="hidden sm:flex items-center gap-5 text-xs font-mono uppercase tracking-wider">
+            <Link href="/creators" className="text-ink-muted hover:text-ink transition">
+              Registry
             </Link>
-            <Link href="/dashboard" className="text-slate-400 hover:text-white transition">
-              Creator Inbox
+            <Link href="/dashboard" className="text-ink-muted hover:text-ink transition">
+              Creator Desk
             </Link>
-            <Link href="/agency/dashboard" className="text-sky-400 font-semibold">
-              Agency Dashboard
+            <Link href="/agency/dashboard" className="text-ink font-bold border-b border-ink pb-0.5">
+              Agency Desk
             </Link>
-            <Link href="/settings" className="text-slate-400 hover:text-white transition">
+            <Link href="/settings" className="text-ink-muted hover:text-ink transition">
               Settings
             </Link>
           </div>
@@ -285,7 +282,7 @@ export default function AgencyDashboardPage() {
           <button
             onClick={fetchContracts}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-ink bg-white border border-ledger hover:border-ink rounded-md transition disabled:opacity-50"
             title="Refresh Campaigns"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -297,31 +294,31 @@ export default function AgencyDashboardPage() {
       </nav>
 
       {/* Header section */}
-      <header className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/60 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-3">
-          <CheckCircle className="w-3.5 h-3.5" />
-          Agency Campaign Management
+      <header className="mb-10 text-left">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-seal-light border border-seal/30 text-seal text-[11px] font-mono uppercase tracking-widest font-semibold mb-3">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Agency Operations Desk • Commercial Dispatch</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-          Brand Campaigns & Settlements
+        <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight text-ink">
+          Agency Campaign Operations
         </h1>
-        <p className="mt-2 text-slate-400 text-sm sm:text-base max-w-2xl">
-          Track campaign deliverables, review submitted creator assets, settle agreements, and download automated GST invoices.
+        <p className="mt-2 text-ink-muted text-sm sm:text-base max-w-2xl font-sans">
+          Track commissioned briefs, audit submitted creator assets, settle agreements, and retrieve automated B2B GST tax invoices.
         </p>
       </header>
 
       {/* Filter Tabs */}
-      <section className="mb-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist">
+      <section className="mb-8 flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none" role="tablist">
         {STATUS_FILTERS.map((filter) => {
           const isActive = activeFilter === filter;
           return (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-all whitespace-nowrap ${
                 isActive
-                  ? 'bg-sky-600 text-white shadow-md shadow-sky-950/40'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200 hover:border-slate-700'
+                  ? 'bg-ink text-paper border border-ink font-bold shadow-sm'
+                  : 'bg-white text-ink-muted border border-ledger hover:text-ink hover:border-ink'
               }`}
               role="tab"
               aria-selected={isActive}
@@ -335,34 +332,35 @@ export default function AgencyDashboardPage() {
       {/* Content Area */}
       {isLoading && contracts.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center">
-          <Loader2 className="w-8 h-8 text-sky-500 animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading agency campaigns...</p>
+          <Loader2 className="w-8 h-8 text-seal animate-spin mb-4" />
+          <p className="text-ink-muted text-xs font-mono uppercase tracking-wider">Accessing agency campaign records...</p>
         </div>
       ) : errorMessage ? (
-        <div className="py-16 px-6 bg-red-950/20 border border-red-900/50 rounded-2xl text-center max-w-lg mx-auto">
-          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-white">Error Loading Campaigns</h3>
-          <p className="text-sm text-slate-400 mt-1 mb-5">{errorMessage}</p>
+        <div className="py-16 px-6 bg-seal-light border border-seal/30 rounded-md text-center max-w-lg mx-auto">
+          <AlertCircle className="w-8 h-8 text-seal mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-display text-ink">Query Exception</h3>
+          <p className="text-xs font-mono text-ink-muted mt-1 mb-5">{errorMessage}</p>
           <button
             onClick={fetchContracts}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider transition"
           >
-            <RefreshCw className="w-4 h-4" />
-            Retry
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry Query
           </button>
         </div>
       ) : filteredContracts.length === 0 ? (
-        <div className="py-20 text-center bg-slate-900/50 border border-slate-800/80 rounded-2xl p-8 max-w-xl mx-auto">
-          <Inbox className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-white">No Campaigns in "{activeFilter}"</h3>
-          <p className="text-sm text-slate-400 mt-2 mb-6">
-            Propose a new campaign to creators from the verified directory to start tracking deliverables.
+        <div className="py-20 text-center bg-white border border-ledger rounded-md p-8 max-w-xl mx-auto shadow-sm">
+          <Inbox className="w-10 h-10 text-ink-muted mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-display text-ink">No Briefs in &ldquo;{activeFilter}&rdquo;</h3>
+          <p className="text-xs font-mono text-ink-muted mt-2 mb-6">
+            Propose a new commercial campaign to creators from the verified registry to initiate tracking.
           </p>
           <Link
             href="/creators"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-sky-950/40"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper text-xs font-mono uppercase tracking-wider font-bold rounded-md transition"
           >
-            <span>Discover Verified Creators</span>
+            <span>Explore Creator Registry</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (
@@ -388,30 +386,30 @@ export default function AgencyDashboardPage() {
             return (
               <article
                 key={contract.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl transition hover:border-slate-700"
+                className="bg-white border border-ledger rounded-md p-6 shadow-sm transition hover:border-ink"
               >
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-ledger">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-1">
-                      <span>Creator: <strong className="text-slate-200">{contract.creator_name}</strong> ({contract.creator_handle})</span>
+                    <div className="flex items-center gap-2 text-xs font-mono text-ink-muted mb-1 flex-wrap">
+                      <span>Creator: <strong className="text-ink">{contract.creator_name}</strong> ({contract.creator_handle})</span>
                     </div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">
+                    <h2 className="text-xl font-bold font-display text-ink tracking-tight">
                       {contract.title}
                     </h2>
 
                     {/* Cryptographic Integrity Seal */}
                     {contract.signature_hash && ['ACCEPTED', 'IN_REVIEW', 'COMPLETED'].includes(contract.status) ? (
-                      <div className="mt-2.5 p-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="mt-3 p-2.5 bg-paper border border-ledger rounded-md text-ink text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5 font-medium text-slate-200">
-                            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                            <span>Digitally Executed Agreement</span>
+                          <div className="flex items-center gap-1.5 font-bold text-ink text-[11px] uppercase tracking-wider">
+                            <ShieldCheck className="w-3.5 h-3.5 text-seal flex-shrink-0" />
+                            <span>Executed Agreement • Cryptographic Audit Record</span>
                           </div>
                           {(contract.accepted_at || contract.accepted_ip) && (
-                            <p className="text-slate-400 text-[11px] pl-5 sm:pl-5">
+                            <p className="text-ink-muted text-[11px] pl-5">
                               {contract.accepted_at
-                                ? `Accepted on ${new Date(contract.accepted_at).toLocaleDateString('en-IN', {
+                                ? `Executed: ${new Date(contract.accepted_at).toLocaleDateString('en-IN', {
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric',
@@ -421,8 +419,8 @@ export default function AgencyDashboardPage() {
                             </p>
                           )}
                         </div>
-                        <div className="font-mono text-[11px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 self-start sm:self-auto">
-                          SHA-256: <span className="text-emerald-400">{contract.signature_hash.slice(0, 10)}...{contract.signature_hash.slice(-8)}</span>
+                        <div className="text-[10px] text-ink-muted bg-white px-2 py-1 rounded-sm border border-ledger self-start sm:self-auto font-mono">
+                          SHA-256: <span className="font-bold text-ink">{contract.signature_hash.slice(0, 10)}...{contract.signature_hash.slice(-8)}</span>
                         </div>
                       </div>
                     ) : null}
@@ -432,43 +430,43 @@ export default function AgencyDashboardPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     {/* Payment Status Badge */}
                     {contract.payment_status === 'PAID' || contract.razorpay_payment_id ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                        Fee Paid
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-pine-light text-pine border border-pine/30">
+                        <ShieldCheck className="w-3 h-3 text-pine" />
+                        Fee Settled
                       </span>
                     ) : contract.status !== 'DECLINED' ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
-                        <CreditCard className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-seal-light text-seal border border-seal/30">
+                        <CreditCard className="w-3 h-3 text-seal" />
                         Fee Pending
                       </span>
                     ) : null}
 
                     {contract.status === 'PROPOSED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
-                        <Clock className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-paper text-ink border border-ledger">
+                        <Clock className="w-3 h-3 text-seal" />
                         Proposed
                       </span>
                     )}
                     {contract.status === 'ACCEPTED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/70 text-sky-300 border border-sky-800/80">
-                        <CheckCircle className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-pine-light text-pine border border-pine/30">
+                        <Check className="w-3 h-3" />
                         Active (In Production)
                       </span>
                     )}
                     {contract.status === 'IN_REVIEW' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/70 text-purple-300 border border-purple-800/80">
-                        <Clock className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-paper text-ink border border-ink">
+                        <Clock className="w-3 h-3 text-seal" />
                         In Review
                       </span>
                     )}
                     {contract.status === 'COMPLETED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        Completed & Settled
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-pine-light text-pine border border-pine/30">
+                        <Check className="w-3 h-3" />
+                        Settled & Closed
                       </span>
                     )}
                     {contract.status === 'DECLINED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono uppercase font-bold tracking-wider bg-paper text-ink-muted border border-ledger">
                         Declined
                       </span>
                     )}
@@ -476,61 +474,61 @@ export default function AgencyDashboardPage() {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-5 border-b border-slate-800 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-5 border-b border-ledger text-sm">
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">
-                      Agreed Budget
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted">
+                      Agreed Consideration
                     </span>
-                    <span className="text-2xl font-bold text-white tracking-tight mt-0.5 block">
+                    <span className="text-2xl font-bold font-mono text-ink tracking-tight mt-0.5 block">
                       ₹{formattedBudget}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Includes flat ₹499 platform fee
+                    <p className="text-[11px] font-mono text-ink-muted mt-1">
+                      Includes flat ₹499 statutory fee
                     </p>
                   </div>
 
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted">
                       Deliverable Scope
                     </span>
-                    <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <span className="text-sm font-bold font-display text-ink mt-1 block">
                       {deliverableType}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-muted mt-1 font-sans">
                       {contract.description || 'Verified commercial deliverable'}
                     </p>
                   </div>
 
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-ink-muted" />
                       Agreed Deadline
                     </span>
-                    <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <span className="text-sm font-bold font-mono text-ink mt-1 block">
                       {formattedDeadline}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Campaign timeline
+                    <p className="text-xs text-ink-muted mt-1 font-mono">
+                      Indian Standard Jurisdiction
                     </p>
                   </div>
                 </div>
 
                 {/* Platform Fee Checkout Card if unpaid and not declined */}
                 {contract.payment_status !== 'PAID' && !contract.razorpay_payment_id && contract.status !== 'DECLINED' && (
-                  <div className="mt-4 p-4 rounded-xl bg-slate-950/70 border border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="mt-4 p-4 rounded-md bg-paper border border-ledger flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-300">
-                        <CreditCard className="w-4 h-4 text-amber-400" />
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-seal">
+                        <CreditCard className="w-3.5 h-3.5" />
                         <span>Platform Convenience Fee Checkout</span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs font-mono text-ink-muted mt-0.5">
                         Flat ₹499 agency convenience fee for digital contract execution & automated GST invoices.
                       </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
                       {/* Currency Toggle */}
-                      <div className="inline-flex items-center p-0.5 bg-slate-900 border border-slate-800 rounded-lg text-xs">
+                      <div className="inline-flex items-center p-0.5 bg-white border border-ledger rounded-md text-xs font-mono">
                         {(['INR', 'USD', 'EUR'] as const).map((curr) => {
                           const activeCurr = selectedCurrencies[contract.id] || 'INR';
                           const isCurrActive = activeCurr === curr;
@@ -541,10 +539,10 @@ export default function AgencyDashboardPage() {
                               onClick={() =>
                                 setSelectedCurrencies((prev) => ({ ...prev, [contract.id]: curr }))
                               }
-                              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                              className={`px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold transition ${
                                 isCurrActive
-                                  ? 'bg-sky-600 text-white shadow-sm'
-                                  : 'text-slate-400 hover:text-white'
+                                  ? 'bg-ink text-paper shadow-sm'
+                                  : 'text-ink-muted hover:text-ink'
                               }`}
                             >
                               {curr}
@@ -563,11 +561,11 @@ export default function AgencyDashboardPage() {
                             selectedCurrencies[contract.id] || 'INR'
                           )
                         }
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-sky-950/40 transition disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider font-bold shadow-sm transition disabled:opacity-50"
                       >
                         {isProcessing ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-seal" />
                             <span>Processing...</span>
                           </>
                         ) : (
@@ -587,14 +585,14 @@ export default function AgencyDashboardPage() {
                 <div className="pt-4">
                   {/* Status: IN_REVIEW -> Prominent Review Card with Actions */}
                   {contract.status === 'IN_REVIEW' && (
-                    <div className="bg-slate-950/80 border border-purple-900/60 rounded-xl p-5 space-y-4">
+                    <div className="bg-paper border border-ledger rounded-md p-5 space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-seal uppercase tracking-wider mb-1">
                             <Clock className="w-3.5 h-3.5" />
-                            Deliverable Ready for Agency Review
+                            Deliverable Ready for Agency Audit
                           </span>
-                          <h3 className="text-base font-semibold text-white">
+                          <h3 className="text-base font-bold font-display text-ink">
                             {latestDeliverable?.title || deliverableType}
                           </h3>
                         </div>
@@ -604,16 +602,16 @@ export default function AgencyDashboardPage() {
                             href={submittedUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-slate-600 text-sky-400 hover:text-sky-300 rounded-xl text-sm font-medium transition"
+                            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border border-ledger hover:border-ink text-ink rounded-md text-xs font-mono uppercase tracking-wider font-bold transition shadow-sm"
                           >
-                            <span>Open Submitted Asset</span>
-                            <ExternalLink className="w-4 h-4" />
+                            <span>Inspect Asset</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-seal" />
                           </a>
                         )}
                       </div>
 
                       {/* Action buttons */}
-                      <div className="pt-2 flex flex-wrap items-center justify-end gap-3 border-t border-slate-800">
+                      <div className="pt-3 flex flex-wrap items-center justify-end gap-3 border-t border-ledger">
                         <button
                           type="button"
                           disabled={isProcessing}
@@ -623,7 +621,7 @@ export default function AgencyDashboardPage() {
                               [contract.id]: !prev[contract.id],
                             }))
                           }
-                          className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition disabled:opacity-50"
+                          className="px-4 py-2 text-xs font-mono uppercase tracking-wider font-bold text-ink-muted hover:text-seal border border-ledger hover:border-seal rounded-md transition disabled:opacity-50"
                         >
                           Request Revision
                         </button>
@@ -632,17 +630,17 @@ export default function AgencyDashboardPage() {
                           type="button"
                           disabled={isProcessing}
                           onClick={() => handleApprove(contract.id)}
-                          className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-950/40 transition active:scale-[0.98] disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-mono uppercase tracking-wider font-bold text-white bg-pine hover:bg-pine/90 rounded-md shadow-sm transition active:scale-[0.99] disabled:opacity-50"
                         >
                           {isProcessing ? (
                             <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Processing...</span>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Releasing...</span>
                             </>
                           ) : (
                             <>
-                              <CheckCircle className="w-4 h-4" />
-                              <span>Approve & Settle</span>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Approve & Settle Deal</span>
                             </>
                           )}
                         </button>
@@ -650,9 +648,9 @@ export default function AgencyDashboardPage() {
 
                       {/* Inline Revision Input Form */}
                       {isRevisionOpen && (
-                        <div className="pt-4 border-t border-slate-800 space-y-3 animate-in fade-in">
-                          <label className="block text-xs font-medium text-slate-300">
-                            Revision Feedback Notes
+                        <div className="pt-4 border-t border-ledger space-y-3">
+                          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-ink">
+                            Revision Directive & Feedback
                           </label>
                           <textarea
                             rows={2}
@@ -664,8 +662,8 @@ export default function AgencyDashboardPage() {
                                 [contract.id]: e.target.value,
                               }))
                             }
-                            placeholder="Specify edits needed (e.g. adjust audio mix, correct brand tag)..."
-                            className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition disabled:opacity-50"
+                            placeholder="Specify required corrections (e.g. adjust audio level, fix brand tag)..."
+                            className="w-full px-3.5 py-2 bg-white border border-ledger rounded-md text-xs font-mono text-ink placeholder:text-ink-muted/50 focus:outline-none focus:border-ink transition disabled:opacity-50"
                           />
                           <div className="flex items-center justify-end gap-2">
                             <button
@@ -676,7 +674,7 @@ export default function AgencyDashboardPage() {
                                   [contract.id]: false,
                                 }))
                               }
-                              className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white rounded-lg transition"
+                              className="px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-ink-muted hover:text-ink transition"
                             >
                               Cancel
                             </button>
@@ -684,10 +682,10 @@ export default function AgencyDashboardPage() {
                               type="button"
                               disabled={isProcessing}
                               onClick={() => handleRequestRevision(contract.id)}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider font-bold transition disabled:opacity-50"
                             >
-                              <Send className="w-3.5 h-3.5" />
-                              <span>Send Feedback</span>
+                              <Send className="w-3 h-3" />
+                              <span>Issue Revision</span>
                             </button>
                           </div>
                         </div>
@@ -697,35 +695,35 @@ export default function AgencyDashboardPage() {
 
                   {/* Status: COMPLETED -> View Invoice Link */}
                   {contract.status === 'COMPLETED' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-950/20 border border-emerald-900/40 rounded-xl px-4 py-3">
-                      <div className="flex items-center gap-2 text-emerald-300 text-sm font-medium">
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
-                        <span>Deliverables approved and settled.</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-pine-light border border-pine/30 rounded-md px-4 py-3">
+                      <div className="flex items-center gap-2 text-pine text-xs font-mono font-bold">
+                        <Check className="w-3.5 h-3.5 text-pine" />
+                        <span>Deliverables approved and commercial contract closed.</span>
                       </div>
 
                       <Link
                         href={`/invoices/${contract.id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600/90 hover:bg-emerald-600 text-white rounded-xl text-sm font-semibold transition shadow-md shadow-emerald-950/30"
+                        className="inline-flex items-center gap-2 px-4 py-1.5 bg-pine hover:bg-pine/90 text-white rounded-md text-xs font-mono uppercase tracking-wider font-bold transition shadow-sm"
                       >
-                        <FileText className="w-4 h-4" />
-                        <span>View Invoice</span>
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Print Tax Invoice</span>
                       </Link>
                     </div>
                   )}
 
                   {/* Status: ACCEPTED */}
                   {contract.status === 'ACCEPTED' && (
-                    <div className="text-xs text-slate-400 flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-sky-400" />
-                      <span>Creator has accepted the campaign and is preparing deliverables.</span>
+                    <div className="text-xs font-mono text-ink-muted flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-seal" />
+                      <span>Creator has executed the agreement and deliverable production is underway.</span>
                     </div>
                   )}
 
                   {/* Status: PROPOSED */}
                   {contract.status === 'PROPOSED' && (
-                    <div className="text-xs text-slate-400 flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Proposal delivered to creator inbox. Awaiting response.</span>
+                    <div className="text-xs font-mono text-ink-muted flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-seal" />
+                      <span>Proposal recorded on ledger. Awaiting creator digital acceptance.</span>
                     </div>
                   )}
                 </div>

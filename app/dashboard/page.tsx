@@ -14,11 +14,12 @@ import {
   Inbox, 
   AlertCircle,
   Calendar,
-  Sparkles,
   ShieldCheck,
+  ArrowRight
 } from 'lucide-react';
 import HeaderUserNav from '@/components/HeaderUserNav';
-import type { Deliverable, ContractDeliverableItem, DashboardContract, Profile } from '@/types/database';
+import { CreateKarLogo } from '@/components/Logo';
+import type { ContractDeliverableItem, DashboardContract, Profile } from '@/types/database';
 
 export default function CreatorDashboardPage() {
   const [contracts, setContracts] = useState<DashboardContract[]>([]);
@@ -77,7 +78,7 @@ export default function CreatorDashboardPage() {
   // Handle Accept or Decline action
   const handleUpdateStatus = async (contractId: string, newStatus: 'ACCEPTED' | 'DECLINED') => {
     setActiveActionId(contractId);
-    const actionLabel = newStatus === 'ACCEPTED' ? 'Accepting deal...' : 'Declining deal...';
+    const actionLabel = newStatus === 'ACCEPTED' ? 'Recording acceptance...' : 'Recording decline...';
     const toastId = toast.loading(actionLabel);
 
     try {
@@ -95,7 +96,7 @@ export default function CreatorDashboardPage() {
 
       toast.success(
         newStatus === 'ACCEPTED'
-          ? 'Deal accepted! You can now submit your deliverable.'
+          ? 'Contract executed with cryptographic seal. Submit deliverables when ready.'
           : 'Deal declined.',
         { id: toastId }
       );
@@ -115,7 +116,7 @@ export default function CreatorDashboardPage() {
     const assetUrl = (submissionUrls[contract.id] || '').trim();
 
     if (!assetUrl) {
-      toast.error('Please enter a valid asset link (Google Drive, Dropbox, or unlisted video).');
+      toast.error('Please enter a valid asset link (Google Drive, Dropbox, or video URL).');
       return;
     }
 
@@ -149,7 +150,7 @@ export default function CreatorDashboardPage() {
         throw new Error(data?.error?.message || 'Failed to submit deliverable.');
       }
 
-      toast.success('Deliverable submitted successfully! Awaiting agency approval.', { id: toastId });
+      toast.success('Deliverable submitted to ledger for agency review.', { id: toastId });
 
       // Clear input and reload
       setSubmissionUrls((prev) => ({ ...prev, [contract.id]: '' }));
@@ -163,29 +164,33 @@ export default function CreatorDashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <main className="min-h-screen bg-paper text-ink py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Top Navigation */}
-      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-slate-800">
+      <nav className="flex items-center justify-between pb-6 mb-8 border-b border-ledger">
         <div className="flex items-center gap-6">
-          <Link href="/creators" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <span className="text-sky-500">Create</span>Kar
-          </Link>
-          <div className="hidden sm:flex items-center gap-4 text-sm font-medium">
+          <CreateKarLogo size="md" href="/" />
+          <div className="hidden sm:flex items-center gap-5 text-xs font-mono uppercase tracking-wider">
             <Link 
               href="/creators" 
-              className="text-slate-400 hover:text-white transition"
+              className="text-ink-muted hover:text-ink transition"
             >
-              Creator Directory
+              Registry
             </Link>
             <Link 
               href="/dashboard" 
-              className="text-sky-400 font-semibold"
+              className="text-ink font-bold border-b border-ink pb-0.5"
             >
-              Deals Inbox
+              Creator Desk
+            </Link>
+            <Link 
+              href="/agency/dashboard" 
+              className="text-ink-muted hover:text-ink transition"
+            >
+              Agency Desk
             </Link>
             <Link 
               href="/settings" 
-              className="text-slate-400 hover:text-white transition"
+              className="text-ink-muted hover:text-ink transition"
             >
               Settings
             </Link>
@@ -196,7 +201,7 @@ export default function CreatorDashboardPage() {
           <button
             onClick={fetchContracts}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-ink bg-white border border-ledger hover:border-ink rounded-md transition disabled:opacity-50"
             title="Refresh Deals"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -209,23 +214,24 @@ export default function CreatorDashboardPage() {
 
       {/* Dismissible Setup Banner */}
       {!isBannerDismissed && profile && (!profile.upi_id || !profile.starting_rate) && (
-        <div className="mb-8 p-4 rounded-2xl bg-amber-950/40 border border-amber-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-200 shadow-lg">
+        <div className="mb-8 p-4 rounded-md bg-seal-light border border-seal/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-seal shadow-sm">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-            <p className="text-sm">
-              Complete your profile to receive direct agency bookings and UPI payouts
+            <AlertCircle className="w-5 h-5 text-seal flex-shrink-0" />
+            <p className="text-xs font-mono text-ink">
+              <strong className="text-seal uppercase tracking-wider mr-1">[ Action Required ]</strong>
+              Complete your profile to receive direct agency bookings and UPI payouts.
             </p>
           </div>
           <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
             <Link
               href="/settings"
-              className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold transition shadow-sm"
+              className="px-3 py-1.5 bg-seal hover:bg-seal-hover text-white rounded-md text-xs font-mono uppercase tracking-wider font-bold transition shadow-sm"
             >
-              Update Profile
+              Complete Profile
             </Link>
             <button
               onClick={() => setIsBannerDismissed(true)}
-              className="p-1 text-amber-400 hover:text-white rounded-lg transition"
+              className="p-1 text-ink-muted hover:text-ink rounded transition"
               title="Dismiss banner"
             >
               <X className="w-4 h-4" />
@@ -235,51 +241,51 @@ export default function CreatorDashboardPage() {
       )}
 
       {/* Header section */}
-      <header className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/60 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-3">
+      <header className="mb-10 text-left">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-seal-light border border-seal/30 text-seal text-[11px] font-mono uppercase tracking-widest font-semibold mb-3">
           <Inbox className="w-3.5 h-3.5" />
-          Creator Deals Inbox
+          <span>Creator Operations Desk • Commercial Briefs</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-          Active Campaigns & Contracts
+        <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight text-ink">
+          Commercial Deal Operations
         </h1>
-        <p className="mt-2 text-slate-400 text-sm sm:text-base max-w-2xl">
-          Review incoming brand campaign proposals, accept or decline offers, and submit completed deliverables for agency review.
+        <p className="mt-2 text-ink-muted text-sm sm:text-base max-w-2xl font-sans">
+          Review incoming brand campaign briefs, execute agreements with cryptographic integrity seals, and submit verified deliverable assets.
         </p>
       </header>
 
       {/* Main Content Area */}
       {isLoading && contracts.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center">
-          <Loader2 className="w-8 h-8 text-sky-500 animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading campaign deals...</p>
+          <Loader2 className="w-8 h-8 text-seal animate-spin mb-4" />
+          <p className="text-ink-muted text-xs font-mono uppercase tracking-wider">Accessing commercial ledger...</p>
         </div>
       ) : errorMessage ? (
-        <div className="py-16 px-6 bg-red-950/20 border border-red-900/50 rounded-2xl text-center max-w-lg mx-auto">
-          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-white">Error Loading Deals</h3>
-          <p className="text-sm text-slate-400 mt-1 mb-5">{errorMessage}</p>
+        <div className="py-16 px-6 bg-seal-light border border-seal/30 rounded-md text-center max-w-lg mx-auto">
+          <AlertCircle className="w-8 h-8 text-seal mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-display text-ink">Query Exception</h3>
+          <p className="text-xs font-mono text-ink-muted mt-1 mb-5">{errorMessage}</p>
           <button
             onClick={fetchContracts}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper rounded-md text-xs font-mono uppercase tracking-wider transition"
           >
-            <RefreshCw className="w-4 h-4" />
-            Retry
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry Query
           </button>
         </div>
       ) : contracts.length === 0 ? (
-        <div className="py-20 text-center bg-slate-900/50 border border-slate-800/80 rounded-2xl p-8 max-w-xl mx-auto">
-          <Inbox className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-white">No Deals in Inbox Yet</h3>
-          <p className="text-sm text-slate-400 mt-2 mb-6">
-            When agencies send campaign proposals, they will appear here with full deliverable specifications and budget terms.
+        <div className="py-20 text-center bg-white border border-ledger rounded-md p-8 max-w-xl mx-auto shadow-sm">
+          <Inbox className="w-10 h-10 text-ink-muted mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-display text-ink">No Commercial Deals Recorded</h3>
+          <p className="text-xs font-mono text-ink-muted mt-2 mb-6">
+            When contracting agencies issue proposals, they will appear here with complete deliverable specifications and statutory fee schedules.
           </p>
           <Link
             href="/creators"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-sky-950/40"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-ink hover:bg-black text-paper text-xs font-mono uppercase tracking-wider font-bold rounded-md transition"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Explore Verified Creators</span>
+            <span>Explore Creator Registry</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (
@@ -305,32 +311,32 @@ export default function CreatorDashboardPage() {
             return (
               <article
                 key={contract.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl transition hover:border-slate-700"
+                className="bg-white border border-ledger rounded-md p-6 shadow-sm transition hover:border-ink"
               >
                 {/* Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-ledger">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs font-medium text-slate-400 mb-1">
-                      <span>Agency: {contract.agency_name || 'CreateKar Brand Studio'}</span>
+                    <div className="flex items-center gap-2 text-xs font-mono text-ink-muted mb-1 flex-wrap">
+                      <span>Agency: <strong className="text-ink">{contract.agency_name || 'Brand Studio'}</strong></span>
                       <span>•</span>
-                      <span>Creator: {contract.creator_name || 'Verified Creator'} ({contract.creator_handle || ''})</span>
+                      <span>Creator: <strong className="text-ink">{contract.creator_name || 'Verified Creator'}</strong> ({contract.creator_handle || ''})</span>
                     </div>
-                    <h2 className="text-xl font-bold text-white tracking-tight">
+                    <h2 className="text-xl font-bold font-display text-ink tracking-tight">
                       {contract.title}
                     </h2>
 
                     {/* Cryptographic Integrity Seal */}
                     {contract.signature_hash && ['ACCEPTED', 'IN_REVIEW', 'COMPLETED'].includes(contract.status) ? (
-                      <div className="mt-2.5 p-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="mt-3 p-2.5 bg-paper border border-ledger rounded-md text-ink text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5 font-medium text-slate-200">
-                            <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                            <span>Digitally Executed Agreement</span>
+                          <div className="flex items-center gap-1.5 font-bold text-ink text-[11px] uppercase tracking-wider">
+                            <ShieldCheck className="w-3.5 h-3.5 text-seal flex-shrink-0" />
+                            <span>Executed Agreement • Cryptographic Audit Record</span>
                           </div>
                           {(contract.accepted_at || contract.accepted_ip) && (
-                            <p className="text-slate-400 text-[11px] pl-5 sm:pl-5">
+                            <p className="text-ink-muted text-[11px] pl-5">
                               {contract.accepted_at
-                                ? `Accepted on ${new Date(contract.accepted_at).toLocaleDateString('en-IN', {
+                                ? `Executed: ${new Date(contract.accepted_at).toLocaleDateString('en-IN', {
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric',
@@ -340,8 +346,8 @@ export default function CreatorDashboardPage() {
                             </p>
                           )}
                         </div>
-                        <div className="font-mono text-[11px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 self-start sm:self-auto">
-                          SHA-256: <span className="text-emerald-400">{contract.signature_hash.slice(0, 10)}...{contract.signature_hash.slice(-8)}</span>
+                        <div className="text-[10px] text-ink-muted bg-white px-2 py-1 rounded-sm border border-ledger self-start sm:self-auto font-mono">
+                          SHA-256: <span className="font-bold text-ink">{contract.signature_hash.slice(0, 10)}...{contract.signature_hash.slice(-8)}</span>
                         </div>
                       </div>
                     ) : null}
@@ -350,39 +356,39 @@ export default function CreatorDashboardPage() {
                   {/* Status Badge */}
                   <div>
                     {contract.status === 'PROPOSED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
-                        <Clock className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-paper text-ink border border-ledger">
+                        <Clock className="w-3 h-3 text-seal" />
                         Proposed
                       </span>
                     )}
                     {contract.status === 'ACCEPTED' && (
                       contract.deliverable_status === 'REVISION_REQUESTED' ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Revision Requested
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-seal-light text-seal border border-seal/30">
+                          <AlertCircle className="w-3 h-3" />
+                          Revision Required
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/70 text-sky-300 border border-sky-800/80">
-                          <Check className="w-3.5 h-3.5" />
-                          Accepted
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-pine-light text-pine border border-pine/30">
+                          <Check className="w-3 h-3" />
+                          Accepted / In Progress
                         </span>
                       )
                     )}
                     {contract.status === 'IN_REVIEW' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-950/70 text-purple-300 border border-purple-800/80">
-                        <Upload className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-paper text-ink border border-ink">
+                        <Upload className="w-3 h-3 text-seal" />
                         In Review
                       </span>
                     )}
                     {contract.status === 'COMPLETED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
-                        <Check className="w-3.5 h-3.5" />
-                        Completed
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-pine-light text-pine border border-pine/30">
+                        <Check className="w-3 h-3" />
+                        Settled & Closed
                       </span>
                     )}
                     {contract.status === 'DECLINED' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                        <X className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-mono uppercase font-bold tracking-wider bg-paper text-ink-muted border border-ledger">
+                        <X className="w-3 h-3" />
                         Declined
                       </span>
                     )}
@@ -390,44 +396,44 @@ export default function CreatorDashboardPage() {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-5 border-b border-slate-800 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-5 border-b border-ledger text-sm">
                   {/* Budget & Fee notice */}
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">
-                      Proposed Budget
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted">
+                      Gross Consideration
                     </span>
-                    <span className="text-2xl font-bold text-white tracking-tight mt-0.5 block">
+                    <span className="text-2xl font-bold font-mono text-ink tracking-tight mt-0.5 block">
                       ₹{formattedBudget}
                     </span>
-                    <p className="text-xs text-sky-400/90 mt-1">
-                      Zero commission. Flat ₹499 agency fee covered.
+                    <p className="text-[11px] font-mono text-ink-muted mt-1">
+                      Zero creator deduction. Flat ₹499 agency fee covered.
                     </p>
                   </div>
 
                   {/* Deliverable Type */}
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium">
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted">
                       Deliverable Scope
                     </span>
-                    <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <span className="text-sm font-bold font-display text-ink mt-1 block">
                       {deliverableType}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-muted mt-1 font-sans">
                       {contract.description || 'Standard verified creator package'}
                     </p>
                   </div>
 
                   {/* Deadline */}
                   <div>
-                    <span className="block text-xs uppercase tracking-wider text-slate-400 font-medium flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      Submission Deadline
+                    <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-muted flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-ink-muted" />
+                      Stipulated Deadline
                     </span>
-                    <span className="text-sm font-semibold text-slate-200 mt-1 block">
+                    <span className="text-sm font-bold font-mono text-ink mt-1 block">
                       {formattedDeadline}
                     </span>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Delivery date agreed with client
+                    <p className="text-xs text-ink-muted mt-1 font-mono">
+                      Indian Standard Jurisdiction
                     </p>
                   </div>
                 </div>
@@ -440,30 +446,30 @@ export default function CreatorDashboardPage() {
                       <button
                         onClick={() => handleUpdateStatus(contract.id, 'DECLINED')}
                         disabled={isMutating}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-xl transition disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono uppercase tracking-wider text-ink-muted hover:text-seal border border-ledger hover:border-seal rounded-md transition disabled:opacity-50"
                       >
                         {isMutating ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <X className="w-4 h-4" />
+                          <X className="w-3.5 h-3.5" />
                         )}
-                        <span>Decline</span>
+                        <span>Decline Offer</span>
                       </button>
 
                       <button
                         onClick={() => handleUpdateStatus(contract.id, 'ACCEPTED')}
                         disabled={isMutating}
-                        className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-xl shadow-lg shadow-sky-950/40 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-mono uppercase tracking-wider font-bold text-white bg-pine hover:bg-pine/90 rounded-md shadow-sm transition active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isMutating ? (
                           <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Processing...</span>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Sealing Agreement...</span>
                           </>
                         ) : (
                           <>
-                            <Check className="w-4 h-4" />
-                            <span>Accept Deal</span>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Execute Agreement</span>
                           </>
                         )}
                       </button>
@@ -478,27 +484,27 @@ export default function CreatorDashboardPage() {
                     const prevSubmission = contract.last_submitted_url || submittedUrl;
 
                     return (
-                      <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-5">
+                      <div className="bg-paper border border-ledger rounded-md p-5">
                         {/* Revision Feedback Alert Box */}
                         {isRevision && contract.revision_notes && (
-                          <div className="mb-4 bg-amber-950/30 border border-amber-800/80 rounded-xl p-4 text-amber-200">
-                            <div className="flex items-center gap-2 font-semibold text-amber-300 text-sm mb-1.5">
-                              <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                              <span>Revision Requested by Agency</span>
+                          <div className="mb-4 bg-seal-light border border-seal/30 rounded-md p-4 text-seal">
+                            <div className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider font-bold mb-1.5">
+                              <AlertCircle className="w-4 h-4 text-seal flex-shrink-0" />
+                              <span>Agency Revision Notice</span>
                             </div>
 
-                            <p className="text-sm text-amber-100 bg-amber-950/50 p-3 rounded-lg border border-amber-900/60 italic mb-2">
-                              "{contract.revision_notes}"
+                            <p className="text-xs font-mono text-ink bg-white p-3 rounded-md border border-seal/20 italic mb-2">
+                              &ldquo;{contract.revision_notes}&rdquo;
                             </p>
 
                             {prevSubmission && (
-                              <div className="text-xs text-amber-300/90 pt-1 flex items-center gap-1.5">
-                                <span>Previous submission:</span>
+                              <div className="text-[11px] font-mono text-ink-muted pt-1 flex items-center gap-1.5">
+                                <span>Previous Asset Link:</span>
                                 <a
                                   href={prevSubmission}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 underline font-medium"
+                                  className="inline-flex items-center gap-1 text-seal hover:underline font-bold"
                                 >
                                   <span className="truncate max-w-xs sm:max-w-md">{prevSubmission}</span>
                                   <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -508,14 +514,14 @@ export default function CreatorDashboardPage() {
                           </div>
                         )}
 
-                        <h3 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                          <Upload className="w-4 h-4 text-sky-400" />
-                          <span>{isRevision ? 'Submit Updated Deliverable Link' : 'Submit Deliverable'}</span>
+                        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink mb-1 flex items-center gap-2">
+                          <Upload className="w-3.5 h-3.5 text-seal" />
+                          <span>{isRevision ? 'Submit Corrected Deliverable Link' : 'Submit Deliverable for Review'}</span>
                         </h3>
-                        <p className="text-xs text-slate-400 mb-4">
+                        <p className="text-xs text-ink-muted mb-4 font-sans">
                           {isRevision
-                            ? 'Review the agency feedback above and submit your updated asset link (Google Drive, Dropbox, or unlisted video).'
-                            : 'Provide a viewable link to your final deliverable asset (Google Drive, Dropbox, Figma, or unlisted YouTube video).'}
+                            ? 'Review the feedback above and supply your updated asset URL (Google Drive, Dropbox, or video link).'
+                            : 'Provide a direct accessible URL to your final deliverable (Google Drive, Dropbox, Figma, or video file).'}
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -531,22 +537,22 @@ export default function CreatorDashboardPage() {
                               }))
                             }
                             placeholder="https://drive.google.com/... or https://youtu.be/..."
-                            className="flex-1 px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition disabled:opacity-50"
+                            className="flex-1 px-3.5 py-2.5 bg-white border border-ledger rounded-md text-xs font-mono text-ink placeholder:text-ink-muted/50 focus:outline-none focus:border-ink transition disabled:opacity-50"
                           />
                           <button
                             onClick={() => handleSubmitDeliverable(contract)}
                             disabled={isMutating}
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition shadow-md shadow-sky-950/40 disabled:opacity-50 whitespace-nowrap"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-mono uppercase tracking-wider font-bold text-paper bg-ink hover:bg-black rounded-md transition shadow-sm disabled:opacity-50 whitespace-nowrap"
                           >
                             {isMutating ? (
                               <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Submitting...</span>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Recording...</span>
                               </>
                             ) : (
                               <>
-                                <Upload className="w-4 h-4" />
-                                <span>{isRevision ? 'Resubmit for Review' : 'Submit for Review'}</span>
+                                <Upload className="w-3.5 h-3.5" />
+                                <span>{isRevision ? 'Resubmit to Desk' : 'Submit Deliverable'}</span>
                               </>
                             )}
                           </button>
@@ -557,10 +563,10 @@ export default function CreatorDashboardPage() {
 
                   {/* Status: IN_REVIEW -> Show Awaiting Agency Approval Badge & Link */}
                   {contract.status === 'IN_REVIEW' && (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-purple-950/20 border border-purple-900/50 rounded-xl px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2 text-purple-300 font-medium">
-                        <Clock className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                        <span>Submitted — Awaiting Agency Approval</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-paper border border-ledger rounded-md px-4 py-3 text-xs font-mono">
+                      <div className="flex items-center gap-2 text-ink font-semibold">
+                        <Clock className="w-3.5 h-3.5 text-seal flex-shrink-0" />
+                        <span>Deliverable Submitted • Awaiting Agency Audit & Release</span>
                       </div>
 
                       {submittedUrl && (
@@ -568,10 +574,10 @@ export default function CreatorDashboardPage() {
                           href={submittedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 underline font-medium"
+                          className="inline-flex items-center gap-1.5 text-seal hover:underline font-bold"
                         >
-                          <span>View Submitted Asset</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Inspect Submitted Asset</span>
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
                         </a>
                       )}
                     </div>
@@ -579,20 +585,20 @@ export default function CreatorDashboardPage() {
 
                   {/* Status: COMPLETED -> Finished Deal Notice */}
                   {contract.status === 'COMPLETED' && (
-                    <div className="flex items-center justify-between bg-emerald-950/20 border border-emerald-900/50 rounded-xl px-4 py-3 text-sm text-emerald-300">
-                      <div className="flex items-center gap-2 font-medium">
-                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                        <span>Campaign Deliverables Approved & Finalized</span>
+                    <div className="flex items-center justify-between bg-pine-light border border-pine/30 rounded-md px-4 py-3 text-xs font-mono text-pine">
+                      <div className="flex items-center gap-2 font-bold">
+                        <Check className="w-3.5 h-3.5 text-pine flex-shrink-0" />
+                        <span>Deliverable Approved & Contract Concluded</span>
                       </div>
                       {submittedUrl && (
                         <a
                           href={submittedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:underline"
+                          className="inline-flex items-center gap-1 text-pine hover:underline font-bold"
                         >
-                          <span>View Asset</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Archived Asset</span>
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
                         </a>
                       )}
                     </div>
@@ -600,8 +606,8 @@ export default function CreatorDashboardPage() {
 
                   {/* Status: DECLINED */}
                   {contract.status === 'DECLINED' && (
-                    <p className="text-xs text-slate-500 italic">
-                      This proposal was declined by the creator.
+                    <p className="text-xs font-mono text-ink-muted italic">
+                      Proposal recorded as declined by creator.
                     </p>
                   )}
                 </div>
