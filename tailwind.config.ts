@@ -11,18 +11,31 @@ const config: Config = {
     extend: {
       colors: {
         dark: {
-          DEFAULT: '#090B10',
-          surface: '#11141D',
-          elevated: '#171B26',
-          border: '#232838',
-          hover: '#1C2232',
+          DEFAULT: '#0D0F14',
+          surface: '#161922',
+          elevated: '#1E2330',
+          border: '#262B38',
+          hover: '#222736',
+        },
+        cobalt: {
+          DEFAULT: '#1D62EA',
+          hover: '#1550C7',
+          light: '#EFF4FE',
+          dark: '#0D3D9E',
+        },
+        tangerine: {
+          DEFAULT: '#FF5B00',
+          hover: '#E05000',
+          light: '#FFF4ED',
+          dark: '#B84100',
         },
         brand: {
-          DEFAULT: '#6366F1',
-          hover: '#4F46E5',
-          light: '#EEF2FF',
-          dark: '#312E81',
-          glow: 'rgba(99, 102, 241, 0.25)',
+          DEFAULT: '#1D62EA',
+          hover: '#1550C7',
+          accent: '#FF5B00',
+          light: '#EFF4FE',
+          dark: '#0D3D9E',
+          glow: 'rgba(29, 98, 234, 0.25)',
         },
       },
       fontFamily: {

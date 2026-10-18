@@ -1,13 +1,17 @@
 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="8" fill="#11141D"/>
-  <rect width="32" height="32" rx="8" stroke="#232838" stroke-width="1"/>
-  <path d="M13 11H9.5C8.67157 11 8 11.6716 8 12.5V19.5C8 20.3284 8.67157 21 9.5 21H13" stroke="#F8FAFC" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M17 10V22" stroke="url(#ck-grad)" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M23 11L17.5 16.5L23.5 22" stroke="url(#ck-grad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-  <defs>
-    <linearGradient id="ck-grad" x1="17" y1="10" x2="23.5" y2="22" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#818CF8"/>
-      <stop offset="1" stop-color="#A78BFA"/>
-    </linearGradient>
-  </defs>
+  <!-- Elevated Dark Mode Squircle Base -->
+  <rect width="32" height="32" rx="7" fill="#161922"/>
+  <rect width="32" height="32" rx="7" stroke="#262B38" stroke-width="1"/>
+  
+  <!-- Centered Official 'CK' Interlocking Geometric Mark -->
+  <g transform="translate(5.5, 7) scale(0.15)">
+    <!-- Cobalt Blue C Arc -->
+    <path d="M 89.70 30.30 L 102.43 17.57 A 60 60 0 1 0 102.43 102.43 L 89.70 89.70 A 42 42 0 1 1 89.70 30.30 Z" fill="#1D62EA"/>
+    
+    <!-- Electric Tangerine K - Upper Stem Segment -->
+    <path d="M 60 60 L 60 28.75 A 31.25 31.25 0 0 1 78 34.46 V 42 L 60 60 Z" fill="#FF5B00"/>
+    
+    <!-- Electric Tangerine K - Main Body (Arms + Lower Stem) -->
+    <path d="M 60 75 L 117 18 H 140 L 98 60 L 140 102 H 117 L 75 60 L 78 63 V 85.54 A 31.25 31.25 0 0 1 60 91.25 V 75 Z" fill="#FF5B00"/>
+  </g>
 </svg>

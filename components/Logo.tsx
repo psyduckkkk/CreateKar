@@ -6,75 +6,86 @@ import Link from 'next/link';
 interface CreateKarLogoProps {
   className?: string;
   markOnly?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  showTagline?: boolean;
+  variant?: 'dark' | 'light' | 'mono';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   href?: string;
 }
 
 export function CreateKarLogo({
   className = '',
   markOnly = false,
+  showTagline = false,
+  variant = 'dark',
   size = 'md',
   href = '/',
 }: CreateKarLogoProps) {
+  // Proportional sizing tokens
   const sizeMap = {
-    sm: { mark: 'w-6 h-6', text: 'text-base', gap: 'gap-2' },
-    md: { mark: 'w-8 h-8', text: 'text-xl', gap: 'gap-2.5' },
-    lg: { mark: 'w-10 h-10', text: 'text-2xl', gap: 'gap-3' },
+    sm: { mark: 'w-6 h-5', text: 'text-base', tagline: 'text-[9px]', gap: 'gap-2' },
+    md: { mark: 'w-8 h-7', text: 'text-xl', tagline: 'text-[10px]', gap: 'gap-2.5' },
+    lg: { mark: 'w-10 h-8.5', text: 'text-2xl', tagline: 'text-[11px]', gap: 'gap-3' },
+    xl: { mark: 'w-14 h-12', text: 'text-3xl', tagline: 'text-[12px]', gap: 'gap-3.5' },
   };
 
-  const { mark, text, gap } = sizeMap[size];
+  const { mark, text, tagline, gap } = sizeMap[size];
+
+  // Colors based on variant
+  const isMono = variant === 'mono';
+  const isLight = variant === 'light';
+
+  const cColor = isMono ? 'currentColor' : '#1D62EA'; // Cobalt Blue
+  const kColor = isMono ? 'currentColor' : '#FF5B00'; // Electric Tangerine
+  const createColor = isMono
+    ? 'currentColor'
+    : isLight
+    ? 'text-[#0D0F14]'
+    : 'text-white';
+  const karColor = isMono
+    ? 'currentColor'
+    : 'text-[#FF5B00]';
+  const taglineColor = isLight ? 'text-[#6B7280]' : 'text-[#8E98A8]';
 
   const content = (
     <span className={`inline-flex items-center ${gap} select-none ${className}`}>
-      {/* Modern Glowing Monogram Mark */}
-      <span className="relative flex items-center justify-center">
-        <span className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-xl blur-[2px] opacity-40 group-hover:opacity-75 transition duration-200" />
-        <svg
-          viewBox="0 0 32 32"
-          className={`${mark} relative flex-shrink-0 drop-shadow-md`}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <rect width="32" height="32" rx="8" fill="#11141D" />
-          <rect width="32" height="32" rx="8" stroke="#232838" strokeWidth="1" />
-          {/* C glyph */}
-          <path
-            d="M13 11H9.5C8.67157 11 8 11.6716 8 12.5V19.5C8 20.3284 8.67157 21 9.5 21H13"
-            stroke="#F8FAFC"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-          />
-          {/* K glyph in Electric Indigo/Violet */}
-          <path
-            d="M17 10V22"
-            stroke="url(#ck-gradient)"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-          />
-          <path
-            d="M23 11L17.5 16.5L23.5 22"
-            stroke="url(#ck-gradient)"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <defs>
-            <linearGradient id="ck-gradient" x1="17" y1="10" x2="23.5" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#818CF8" />
-              <stop offset="1" stopColor="#A78BFA" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </span>
+      {/* Official Interlocking 'CK' Geometric Monogram */}
+      <svg
+        viewBox="0 0 140 120"
+        className={`${mark} flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="CreateKar Monogram"
+      >
+        {/* Cobalt Blue C Arc (270° sweep, 45° angled terminal cuts) */}
+        <path
+          d="M 89.70 30.30 L 102.43 17.57 A 60 60 0 1 0 102.43 102.43 L 89.70 89.70 A 42 42 0 1 1 89.70 30.30 Z"
+          fill={cColor}
+        />
+        {/* Electric Tangerine K - Upper Stem Segment */}
+        <path
+          d="M 60 60 L 60 28.75 A 31.25 31.25 0 0 1 78 34.46 V 42 L 60 60 Z"
+          fill={kColor}
+        />
+        {/* Electric Tangerine K - Main Body (Diagonal Arms & Lower Stem) */}
+        <path
+          d="M 60 75 L 117 18 H 140 L 98 60 L 140 102 H 117 L 75 60 L 78 63 V 85.54 A 31.25 31.25 0 0 1 60 91.25 V 75 Z"
+          fill={kColor}
+        />
+      </svg>
 
       {!markOnly && (
-        <span className={`font-display font-extrabold tracking-tight flex items-baseline ${text}`}>
-          <span className="text-white">Create</span>
-          <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-violet-400 bg-clip-text text-transparent ml-0.5">
-            Kar
+        <span className="flex flex-col">
+          <span className={`font-display font-bold tracking-tight leading-none ${text}`}>
+            <span className={createColor}>Create</span>
+            <span className={karColor}>Kar</span>
           </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 ml-1 inline-block animate-pulse" aria-hidden="true" />
+          {showTagline && (
+            <span
+              className={`font-sans uppercase tracking-[0.18em] font-semibold mt-1 leading-tight ${tagline} ${taglineColor}`}
+            >
+              Create fearlessly. Get paid securely.
+            </span>
+          )}
         </span>
       )}
     </span>
