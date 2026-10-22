@@ -1,7 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
-  <rect width="64" height="64" rx="14" fill="#090A0D" stroke="#2E3242" stroke-width="2"/>
-  <!-- Gold angular C and K sovereign monogram -->
-  <path d="M30 18H20C17.7909 18 16 19.7909 16 22V42C16 44.2091 17.7909 46 20 46H30" stroke="#CDA043" stroke-width="4.5" stroke-linecap="round"/>
-  <path d="M36 18V46" stroke="#F5F6F8" stroke-width="4.5" stroke-linecap="round"/>
-  <path d="M48 20L36 32L48 44" stroke="#CDA043" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" width="140" height="120" fill="none">
+  <!-- Cobalt Blue C Arc -->
+  <path
+    d="M 89.70 30.30 L 102.43 17.57 A 60 60 0 1 0 102.43 102.43 L 89.70 89.70 A 42 42 0 1 1 89.70 30.30 Z"
+    fill="#1D62EA"
+  />
+  <!-- Electric Tangerine K - Upper Stem Segment -->
+  <path
+    d="M 60 60 L 60 28.75 A 31.25 31.25 0 0 1 78 34.46 V 42 L 60 60 Z"
+    fill="#FF5B00"
+  />
+  <!-- Electric Tangerine K - Main Body -->
+  <path
+    d="M 60 75 L 117 18 H 140 L 98 60 L 140 102 H 117 L 75 60 L 78 63 V 85.54 A 31.25 31.25 0 0 1 60 91.25 V 75 Z"
+    fill="#FF5B00"
+  />
 </svg>
