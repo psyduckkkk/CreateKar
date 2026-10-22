@@ -1,32 +1,26 @@
-# Environment variables
-.env
-.env*.local
-.env.local
-
 # Dependencies
 node_modules/
-/.pnp
+.pnp
 .pnp.js
 
-# Next.js production build output
+# Testing
+/coverage
+
+# Next.js
 .next/
 out/
+build/
+dist/
 
-# TypeScript cache
+# Misc
+.DS_Store
+*.pem
+
+# Environment & secrets
+.env*
+.neon
+.agents/.env*
+
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-# Neon & IDE
-.neon
-.neon/
-.vscode/
-.idea/
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# System
-.DS_Store
-Thumbs.db
