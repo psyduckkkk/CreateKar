@@ -27,7 +27,7 @@ export function CookieBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-lg border border-border-strong bg-surface-elevated p-4 shadow-2xl text-xs text-ink-secondary">
+    <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-lg border border-border-strong bg-surface-elevated p-4 text-xs text-ink-secondary" data-ui="overlay">
       <div className="flex items-start gap-3">
         <Shield className="h-4 w-4 text-brand-gold shrink-0 mt-0.5" />
         <div className="space-y-2">
