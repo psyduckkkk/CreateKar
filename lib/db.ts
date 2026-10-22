@@ -17,11 +17,13 @@ export function getDbPool(): Pool {
 /**
  * Execute a type-safe SQL query against Neon PostgreSQL
  */
-export async function query<T = any>(text: string, params: any[] = []): Promise<T[]> {
+export async function query<T = any>(text: string, params: any[] = []): Promise<T[] & { rows: T[] }> {
   const client = getDbPool();
   try {
     const res = await client.query(text, params);
-    return res.rows as T[];
+    const rows = res.rows as any;
+    rows.rows = res.rows;
+    return rows;
   } catch (error) {
     console.error("Database query execution error:", { text, error });
     throw error;

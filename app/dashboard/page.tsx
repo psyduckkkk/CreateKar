@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Copy,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,6 +48,55 @@ export default function CreatorDashboard() {
 
   // Invoice viewer modal
   const [viewInvoice, setViewInvoice] = useState<any>(null);
+
+  // Negotiation modal
+  const [selectedContractForNegotiation, setSelectedContractForNegotiation] = useState<any | null>(null);
+  const [negotiationsList, setNegotiationsList] = useState<any[]>([]);
+  const [negotiationMessage, setNegotiationMessage] = useState("");
+  const [counterGross, setCounterGross] = useState("");
+  const [counterAdvance, setCounterAdvance] = useState("");
+
+  const handleOpenNegotiations = async (contract: any) => {
+    setSelectedContractForNegotiation(contract);
+    setCounterGross(String(contract.gross_amount_inr));
+    setCounterAdvance(String(contract.advance_percent));
+    try {
+      const res = await fetch(`/api/agency/contracts/${contract.id}/negotiations`);
+      const data = await res.json();
+      if (data.negotiations) {
+        setNegotiationsList(data.negotiations);
+      }
+    } catch {
+      toast.error("Failed to load negotiation thread.");
+    }
+  };
+
+  const handleSendNegotiationMessage = async (action: "REPLY" | "COUNTER_OFFER" | "ACCEPT_COUNTER") => {
+    if (!selectedContractForNegotiation) return;
+    try {
+      const res = await fetch(`/api/agency/contracts/${selectedContractForNegotiation.id}/negotiations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: negotiationMessage || (action === "ACCEPT_COUNTER" ? "Revised deal terms accepted by creator." : "Counter proposal submitted."),
+          proposed_gross_amount_inr: action !== "REPLY" ? Number(counterGross) : undefined,
+          proposed_advance_percent: action !== "REPLY" ? Number(counterAdvance) : undefined,
+          action
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to submit negotiation.");
+        return;
+      }
+      toast.success(action === "ACCEPT_COUNTER" ? "Terms accepted and sealed!" : "Negotiation sent!");
+      setNegotiationMessage("");
+      handleOpenNegotiations(selectedContractForNegotiation);
+      loadData();
+    } catch {
+      toast.error("Error submitting negotiation.");
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -428,6 +478,13 @@ export default function CreatorDashboard() {
                       <span className="rounded bg-surface-elevated px-2.5 py-1 text-xs font-semibold text-white">
                         Status: {c.status}
                       </span>
+                      <button
+                        onClick={() => handleOpenNegotiations(c)}
+                        className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        <span>Negotiation</span>
+                      </button>
                       {c.status === "PROPOSED" && (
                         <button
                           onClick={() => handleAcceptContract(c.id)}
@@ -1021,6 +1078,146 @@ export default function CreatorDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* CREATOR NEGOTIATION THREAD MODAL (4.3) */}
+      {/* ======================================================== */}
+      {selectedContractForNegotiation && (
+        <div data-ui="modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div data-ui="divider" className="flex items-center justify-between border-b border-border-subtle pb-4">
+              <div>
+                <code className="text-xs text-[#FF5B00]">
+                  {selectedContractForNegotiation.contract_number}
+                </code>
+                <h3 className="text-lg font-bold text-white mt-0.5">
+                  Negotiate Terms: {selectedContractForNegotiation.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedContractForNegotiation(null)}
+                className="text-ink-muted hover:text-white p-1"
+                aria-label="Close dialog"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Current Terms Banner */}
+            <div className="rounded-lg bg-surface-elevated p-3 text-xs flex items-center justify-between">
+              <div>
+                <span className="text-ink-muted block text-[11px]">Agreed Commercials:</span>
+                <span className="font-bold text-white">
+                  ₹{Number(selectedContractForNegotiation.gross_amount_inr).toLocaleString("en-IN")} (Advance: {selectedContractForNegotiation.advance_percent}%)
+                </span>
+              </div>
+              <span className="rounded bg-[#FF5B00]/15 text-[#FF5B00] px-2 py-0.5 text-[10px] font-bold">
+                Status: {selectedContractForNegotiation.status}
+              </span>
+            </div>
+
+            {/* Messages Thread */}
+            <div className="space-y-3 max-h-56 overflow-y-auto p-1">
+              {negotiationsList.length === 0 ? (
+                <div className="text-center text-xs text-ink-muted py-6">
+                  No negotiation messages yet. You can submit your thoughts or a counter-rate below.
+                </div>
+              ) : (
+                negotiationsList.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`rounded-lg p-3 text-xs space-y-1 ${
+                      n.sender_role === "CREATOR"
+                        ? "bg-[#FF5B00]/10 border border-[#FF5B00]/20 ml-6"
+                        : "bg-surface-elevated border border-border-subtle mr-6"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-white">
+                        {n.sender_name} ({n.sender_role})
+                      </span>
+                      <span className="text-ink-muted">
+                        {new Date(n.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <p className="text-ink-secondary">{n.message}</p>
+                    {n.proposed_gross_amount_inr && (
+                      <div className="text-[11px] font-medium text-amber-300 pt-1">
+                        Proposed Rate: ₹{Number(n.proposed_gross_amount_inr).toLocaleString("en-IN")} • Advance: {n.proposed_advance_percent}%
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Counter offer & Message inputs */}
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Counter Rate (INR)</label>
+                  <input
+                    type="number"
+                    value={counterGross}
+                    onChange={(e) => setCounterGross(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Counter Advance (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={counterAdvance}
+                    onChange={(e) => setCounterAdvance(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-ink-primary">Message to Agency</label>
+                <input
+                  type="text"
+                  placeholder="e.g. My baseline for 1 reel + 2 shorts is ₹75,000 with 50% advance."
+                  value={negotiationMessage}
+                  onChange={(e) => setNegotiationMessage(e.target.value)}
+                  className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSendNegotiationMessage("REPLY")}
+                  className="rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00]"
+                >
+                  Send Message
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSendNegotiationMessage("COUNTER_OFFER")}
+                    className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-500"
+                  >
+                    Send Counter Offer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendNegotiationMessage("ACCEPT_COUNTER")}
+                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500"
+                  >
+                    Accept Revised Terms
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

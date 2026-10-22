@@ -9,7 +9,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-background/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border-subtle bg-background/90" data-ui="main-header">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo with Official CreateKar Identity */}
         <CreateKarLogo size="md" showTagline={false} />
@@ -42,7 +42,7 @@ export function Navbar() {
             href="/signup"
             className="inline-flex items-center gap-2 rounded-lg bg-[#FF5B00] px-4 py-2 text-sm font-semibold text-white transition-transform hover:bg-[#ff6c1a] active:scale-[0.98]"
           >
-            <span>Get Started</span>
+            <span>Start Collaborating</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -59,7 +59,7 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="border-b border-border-subtle bg-surface px-4 py-6 md:hidden">
+        <div data-ui="mobile-drawer" className="border-b border-border-subtle bg-surface px-4 py-6 md:hidden">
           <nav className="flex flex-col gap-4 text-base font-medium text-ink-secondary">
             <Link
               href="#how-it-works"
@@ -93,7 +93,7 @@ export function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-center py-2 text-ink-primary border border-border-subtle rounded-md"
+                className="text-center py-2 text-ink-primary bg-surface-elevated rounded-md hover:bg-surface-elevated/80"
               >
                 Log In
               </Link>

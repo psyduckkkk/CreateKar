@@ -4,7 +4,7 @@ import { CreateKarLogo } from "./CreateKarLogo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border-subtle bg-surface text-ink-secondary">
+    <footer data-ui="footer" className="border-t border-border-subtle bg-surface text-ink-secondary">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand info */}
@@ -100,7 +100,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-border-subtle pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-ink-muted gap-4">
+        <div data-ui="footer-copyright" className="mt-8 border-t border-border-subtle pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-ink-muted gap-4">
           <p>© {new Date().getFullYear()} CreateKar Technologies Pvt Ltd. All rights reserved.</p>
           <p className="text-[11px] text-ink-muted">
             Collab fearlessly. Get paid safely.

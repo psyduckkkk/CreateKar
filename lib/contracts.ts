@@ -75,20 +75,15 @@ export function calculateContractTds({
   };
 }
 
+export function calculateTdsDeduction(grossAmountInr: number, tdsSection: TdsSection): ContractCalculationResult {
+  return calculateContractTds({ grossAmountInr, tdsSection });
+}
+
 /**
  * Generates an immutable SHA-256 cryptographic digest of the contract.
  * Default regulatory record under Information Technology Act, 2000 (Section 10A).
  */
-export function generateContractSha256Digest(contractData: {
-  contractId: string;
-  brandId: string;
-  creatorId: string;
-  title: string;
-  deliverables: Array<{ type: string; deadline: string }>;
-  grossAmountInr: number;
-  tdsDetails: { section: string; amount: number };
-  createdAt: string;
-}): string {
-  const serialized = JSON.stringify(contractData, Object.keys(contractData).sort());
+export function generateContractSha256Digest(contractData: any): string {
+  const serialized = typeof contractData === "string" ? contractData : JSON.stringify(contractData, Object.keys(contractData).sort());
   return crypto.createHash("sha256").update(serialized, "utf8").digest("hex");
 }

@@ -60,3 +60,5 @@ export async function getCurrentSession(): Promise<SessionPayload | null> {
   if (!token) return null;
   return verifySessionToken(token);
 }
+
+export const getSession = getCurrentSession;

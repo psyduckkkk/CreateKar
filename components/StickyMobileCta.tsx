@@ -23,7 +23,7 @@ export function StickyMobileCta() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 p-3 bg-surface/95 backdrop-blur-md border-t border-border-strong md:hidden transition-transform animate-in slide-in-from-bottom duration-200">
+    <div data-ui="mobile-cta" className="fixed bottom-0 left-0 right-0 z-40 p-3 bg-surface/95 border-t border-border-strong md:hidden transition-transform animate-in slide-in-from-bottom duration-200">
       <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-ink-primary flex items-center gap-1">
@@ -36,7 +36,7 @@ export function StickyMobileCta() {
           href="/signup"
           className="inline-flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] active:scale-95 transition-colors"
         >
-          <span>Get Started</span>
+          <span>Start Now</span>
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
