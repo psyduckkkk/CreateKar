@@ -26,7 +26,8 @@ import {
   ShieldCheck,
   FileCheck2,
   Phone,
-  Mail
+  Mail,
+  Printer
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,6 +45,7 @@ export default function CreatorDashboard() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [payouts, setPayouts] = useState<any>({ transactions: [], payoutDetails: {} });
   const [registeredAgencies, setRegisteredAgencies] = useState<any[]>([]);
+  const [selectedContractForPdf, setSelectedContractForPdf] = useState<any | null>(null);
 
   // Modals state
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -392,9 +394,13 @@ export default function CreatorDashboard() {
       }
       toast.success("Contract proposal generated & sealed!");
       setCreateContractModalOpen(false);
+      const signUrl = typeof window !== 'undefined' && data.guestSignToken
+        ? `${window.location.origin}/contracts/sign/${data.guestSignToken}`
+        : (data.publicSigningUrl || "");
+
       setCreatedContractData({
         contractNumber: data.contractNumber,
-        publicSigningUrl: data.publicSigningUrl || `${window.location.origin}/contracts/sign/${data.guestSignToken}`,
+        publicSigningUrl: signUrl,
         clientCompany: data.clientCompany,
         clientName: contractClientName,
         clientPhone: contractClientPhone,
@@ -558,11 +564,11 @@ export default function CreatorDashboard() {
               </div>
 
               <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
-                <span className="text-xs text-ink-muted">Escrow Locked</span>
+                <span className="text-xs text-ink-muted">Advance Protected</span>
                 <div className="text-2xl font-bold tabular-nums text-[#FF5B00]">
                   ₹{Number(stats.locked_escrow_inr || 0).toLocaleString("en-IN")}
                 </div>
-                <span className="text-[11px] text-ink-secondary">Held in safe nodal bank</span>
+                <span className="text-[11px] text-ink-secondary">Safely held until approved</span>
               </div>
 
               <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
@@ -691,7 +697,7 @@ export default function CreatorDashboard() {
                           </span>
                           <span className="text-[10px] text-ink-muted">
                             {contract.payment_mode === "ESCROW_RAZORPAY"
-                              ? "Escrow Vault"
+                              ? "Protected Advance"
                               : "Direct P2P"}
                           </span>
                         </div>
@@ -798,6 +804,14 @@ export default function CreatorDashboard() {
                         </button>
                       )}
                       <button
+                        onClick={() => setSelectedContractForPdf(c)}
+                        className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                        title="Download or print contract as PDF"
+                      >
+                        <Printer className="h-3.5 w-3.5 text-[#FF5B00]" />
+                        <span>PDF &amp; Print</span>
+                      </button>
+                      <button
                         onClick={() => handleOpenNegotiations(c)}
                         className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
                       >
@@ -825,7 +839,7 @@ export default function CreatorDashboard() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-ink-muted block text-[11px]">Advance (Escrow)</span>
+                      <span className="text-ink-muted block text-[11px]">Protected Advance</span>
                       <span className="font-semibold tabular-nums text-[#FF5B00]">
                         ₹{Number(c.advance_amount_inr).toLocaleString("en-IN")} ({c.advance_percent}%)
                       </span>
@@ -839,7 +853,7 @@ export default function CreatorDashboard() {
                     <div>
                       <span className="text-ink-muted block text-[11px]">Payment Mode</span>
                       <span className="font-semibold text-white">
-                        {c.payment_mode === "ESCROW_RAZORPAY" ? "Razorpay Nodal Escrow" : "Direct UPI / P2P"}
+                        {c.payment_mode === "ESCROW_RAZORPAY" ? "Protected Bank Deposit" : "Direct UPI / P2P"}
                       </span>
                     </div>
                   </div>
@@ -990,7 +1004,7 @@ export default function CreatorDashboard() {
                     CreateKar can make the finest invoices based on contracts!
                   </p>
                   <p className="text-xs text-ink-secondary">
-                    Linking invoices directly to contracts guarantees agreed advance escrow, automated milestone releases, and CBDT-compliant TDS schedules. Try the contracts feature next time if you like!
+                    Linking invoices directly to contracts guarantees agreed advance protection, automated milestone releases, and CBDT-compliant TDS schedules. Try the contracts feature next time if you like!
                   </p>
                 </div>
               </div>
@@ -1065,14 +1079,14 @@ export default function CreatorDashboard() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 5: PAYMENTS & ESCROW (3.4) */}
+        {/* TAB 5: PAYMENTS & PAYOUTS (3.4) */}
         {/* ======================================================== */}
         {activeTab === "payments" && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-bold text-white">Payments &amp; Escrow Ledger</h2>
+              <h2 className="text-lg font-bold text-white">Payments &amp; Payouts Ledger</h2>
               <p className="text-xs text-ink-secondary mt-1">
-                Manage your payout accounts, escrow balance releases, and 1-click WhatsApp reminders.
+                Manage your payout accounts, payment releases, and 1-click WhatsApp reminders.
               </p>
             </div>
 
@@ -1188,7 +1202,7 @@ export default function CreatorDashboard() {
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white">{pt.contract_title}</span>
                           <span className="rounded bg-surface-elevated px-2 py-0.5 text-[10px] text-ink-muted">
-                            {pt.payment_mode === "ESCROW_RAZORPAY" ? "Escrow Vault" : "Direct P2P"}
+                            {pt.payment_mode === "ESCROW_RAZORPAY" ? "Protected Deposit" : "Direct P2P"}
                           </span>
                         </div>
                         <span className="text-ink-muted block text-[11px]">
@@ -1677,6 +1691,14 @@ export default function CreatorDashboard() {
                               ₹{Number(c.gross_amount_inr).toLocaleString("en-IN")}
                             </span>
                           </div>
+                          <button
+                            onClick={() => setSelectedContractForPdf(c)}
+                            className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                            title="Download or export contract as PDF"
+                          >
+                            <Printer className="h-3.5 w-3.5 text-[#FF5B00]" />
+                            <span>PDF &amp; Print</span>
+                          </button>
                           {c.guest_sign_token && (
                             <button
                               onClick={() => {
@@ -1779,15 +1801,15 @@ export default function CreatorDashboard() {
                     <div className="text-2xl font-bold tabular-nums text-emerald-400">
                       ₹{Number(stats.total_earnings_inr || 0).toLocaleString("en-IN")}
                     </div>
-                    <span className="text-[11px] text-ink-secondary">Settled directly or via escrow</span>
+                    <span className="text-[11px] text-ink-secondary">Settled directly or via payment protection</span>
                   </div>
 
                   <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
-                    <span className="text-xs text-ink-muted">Currently in Escrow</span>
+                    <span className="text-xs text-ink-muted">Currently Protected</span>
                     <div className="text-2xl font-bold tabular-nums text-[#FF5B00]">
                       ₹{Number(stats.locked_escrow_inr || 0).toLocaleString("en-IN")}
                     </div>
-                    <span className="text-[11px] text-ink-secondary">Nodal bank escrow balance</span>
+                    <span className="text-[11px] text-ink-secondary">Safely held until approved</span>
                   </div>
 
                   <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
@@ -1800,9 +1822,9 @@ export default function CreatorDashboard() {
                 </div>
 
                 <div className="rounded-xl border border-border-strong bg-surface p-6 space-y-3">
-                  <h4 className="text-sm font-bold text-white">Escrow &amp; Payout Coordinates</h4>
+                  <h4 className="text-sm font-bold text-white">Payment &amp; Payout Coordinates</h4>
                   <p className="text-xs text-ink-secondary leading-relaxed">
-                    All escrow payments released by agencies are disbursed directly into your registered bank account or UPI handle. You can update your payment coordinates in the Edit Profile tab.
+                    All collaboration payments released by clients are disbursed directly into your registered bank account or UPI handle. You can update your payment coordinates in the Edit Profile tab.
                   </p>
                   <div className="pt-2 flex items-center gap-3">
                     <button
@@ -2033,90 +2055,328 @@ export default function CreatorDashboard() {
       )}
 
       {/* ======================================================== */}
+      {/* CONTRACT PDF EXPORT & PREVIEW MODAL */}
+      {/* ======================================================== */}
+      {selectedContractForPdf && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
+          <div className="w-full max-w-3xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto">
+            {/* Top Action Bar (hidden on print) */}
+            <div data-ui="divider" className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-subtle pb-4">
+              <div>
+                <span className="text-xs font-semibold text-[#FF5B00] uppercase">Legal Agreement Document</span>
+                <h3 className="text-lg font-bold text-white mt-0.5">{selectedContractForPdf.contract_number}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+                  title="Print or export as PDF"
+                >
+                  <Printer className="h-4 w-4" />
+                  <span>Download PDF / Print</span>
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `Hi, here is our campaign agreement ${selectedContractForPdf.contract_number} (${selectedContractForPdf.title}) for ₹${Number(selectedContractForPdf.gross_amount_inr).toLocaleString("en-IN")}: ${
+                      selectedContractForPdf.guest_sign_token
+                        ? `${typeof window !== "undefined" ? window.location.origin : ""}/contracts/sign/${selectedContractForPdf.guest_sign_token}`
+                        : "Sealed on CreateKar"
+                    }`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span>Share on WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedContractForPdf(null)}
+                  className="rounded-lg border border-border-subtle bg-surface-elevated p-1.5 text-ink-muted hover:text-white"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Document Body (Printable Vector layout) */}
+            <div className="printable-document space-y-6 rounded-xl border border-border-subtle bg-surface-elevated/40 p-6 text-xs text-ink-secondary">
+              <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm tracking-wider text-white">CREATEKAR</span>
+                    <span className="rounded bg-emerald-500/10 text-emerald-300 px-2 py-0.5 text-[10px] font-semibold border border-emerald-500/20">
+                      LEGAL AGREEMENT
+                    </span>
+                  </div>
+                  <h4 className="text-base font-bold text-white mt-1">{selectedContractForPdf.title}</h4>
+                  <p className="text-xs text-ink-muted">Contract Ref: {selectedContractForPdf.contract_number}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-ink-muted block">Status</span>
+                  <span className="font-bold text-white uppercase text-xs">{selectedContractForPdf.status}</span>
+                </div>
+              </div>
+
+              {/* Contracting Parties */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1 rounded-lg border border-border-subtle bg-surface p-4">
+                  <span className="text-[11px] font-semibold text-[#FF5B00] block uppercase">First Party (Creator / Freelancer)</span>
+                  <p className="font-bold text-white text-sm">{profile.name || "Creator"}</p>
+                  <p className="text-ink-secondary text-xs">PAN: {profile.pan || "Registered with CreateKar"}</p>
+                  {profile.gstin && <p className="text-ink-secondary text-xs">GSTIN: {profile.gstin}</p>}
+                </div>
+
+                <div className="space-y-1 rounded-lg border border-border-subtle bg-surface p-4">
+                  <span className="text-[11px] font-semibold text-[#FF5B00] block uppercase">Second Party (Client / Agency)</span>
+                  <p className="font-bold text-white text-sm">
+                    {selectedContractForPdf.company_name || selectedContractForPdf.client_company || "Brand Partner"}
+                  </p>
+                  {selectedContractForPdf.client_name && (
+                    <p className="text-ink-secondary text-xs">Representative: {selectedContractForPdf.client_name}</p>
+                  )}
+                  {selectedContractForPdf.client_email && (
+                    <p className="text-ink-secondary text-xs">Email: {selectedContractForPdf.client_email}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Scope & Brief */}
+              <div className="space-y-2 rounded-lg border border-border-subtle bg-surface p-4">
+                <span className="text-[11px] font-semibold text-white block uppercase">Campaign Brief &amp; Scope of Work</span>
+                <p className="text-xs text-ink-secondary leading-relaxed">{selectedContractForPdf.campaign_brief}</p>
+              </div>
+
+              {/* Commercial Terms Table */}
+              <div data-ui="table-wrapper" className="rounded-lg border border-border-subtle overflow-hidden">
+                <table className="w-full text-left">
+                  <thead className="bg-surface-elevated text-ink-muted text-[11px]">
+                    <tr>
+                      <th className="p-3">Commercial Term</th>
+                      <th className="p-3">Specification</th>
+                      <th className="p-3 text-right">Amount (INR)</th>
+                    </tr>
+                  </thead>
+                  <tbody data-ui="table-body" className="divide-y divide-border-subtle">
+                    <tr>
+                      <td className="p-3 font-medium text-white">Gross Collaboration Fee</td>
+                      <td className="p-3 text-ink-muted">Agreed base compensation</td>
+                      <td className="p-3 text-right font-bold text-white tabular-nums">
+                        ₹{Number(selectedContractForPdf.gross_amount_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 text-ink-secondary">Protected Advance Deposit</td>
+                      <td className="p-3 text-ink-muted">
+                        {selectedContractForPdf.advance_percent}% deposited before filming
+                      </td>
+                      <td className="p-3 text-right text-[#FF5B00] font-semibold tabular-nums">
+                        ₹{Number(selectedContractForPdf.advance_amount_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 text-ink-secondary">TDS Deduction (Statutory)</td>
+                      <td className="p-3 text-ink-muted">
+                        Section {selectedContractForPdf.tds_section || "194C / None"}
+                      </td>
+                      <td className="p-3 text-right text-ink-muted tabular-nums">
+                        {selectedContractForPdf.tds_section !== "NONE" ? `₹${selectedContractForPdf.tds_amount_inr}` : "₹0 (Exempt)"}
+                      </td>
+                    </tr>
+                    <tr className="bg-surface-elevated font-semibold text-white">
+                      <td className="p-3">Balance Due on Deliverable Approval</td>
+                      <td className="p-3 text-ink-muted">Disbursed immediately upon sign-off</td>
+                      <td className="p-3 text-right text-emerald-400 tabular-nums font-bold">
+                        ₹{Number(selectedContractForPdf.balance_amount_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Standard Legal Clauses */}
+              <div className="space-y-2 rounded-lg border border-border-subtle bg-surface p-4 text-[11px] leading-relaxed">
+                <span className="font-semibold text-white block uppercase">Key Agreement Terms</span>
+                <p>
+                  <strong>1. Revisions &amp; Approvals:</strong> Includes up to 2 rounds of standard editorial revisions. Revisions must align strictly with the approved campaign brief.
+                </p>
+                <p>
+                  <strong>2. Intellectual Property License:</strong> Creator grants client a non-exclusive digital promotional license for organic and whitelisted social distribution upon full payment clearance.
+                </p>
+                <p>
+                  <strong>3. Payment Protection:</strong> All advance funds are held under bank payment protection and released systematically upon milestone completion or mutual approval.
+                </p>
+              </div>
+
+              {/* SHA-256 Digital Seal */}
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-white">
+                  <div className="flex items-center gap-1.5 text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Cryptographic SHA-256 Digital Seal</span>
+                  </div>
+                  <span className="text-[11px] text-ink-muted">
+                    Sec. 10A Indian IT Act 2000
+                  </span>
+                </div>
+                <code className="block rounded bg-surface p-2 text-[10px] text-ink-muted break-all border border-border-subtle">
+                  {selectedContractForPdf.sha256_digest || "SHA-256 VERIFIED CONTRACT INTEGRITY RECORD"}
+                </code>
+              </div>
+            </div>
+
+            {/* Bottom Bar (hidden on print) */}
+            <div data-ui="divider" className="no-print flex items-center justify-end gap-3 pt-2 border-t border-border-subtle">
+              <button
+                type="button"
+                onClick={() => setSelectedContractForPdf(null)}
+                className="rounded-lg border border-border-subtle bg-surface-elevated px-5 py-2 text-xs font-semibold text-white hover:border-border-strong"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
       {/* FORMAL GST INVOICE VIEWER MODAL */}
       {/* ======================================================== */}
       {viewInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
-          <div className="w-full max-w-2xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
-            {/* Watermark Banner */}
-            {viewInvoice.watermark_enabled && (
-              <code className="block rounded bg-amber-400/10 border border-amber-400/20 p-2.5 text-xs text-amber-200 text-center">
-                [ WATERMARK: Powered by CreateKar Sovereign Escrow ]
-              </code>
-            )}
-
-            <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto">
+            {/* Top Action Bar (hidden on print) */}
+            <div data-ui="divider" className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-subtle pb-4">
               <div>
-                <code className="text-xs font-bold text-[#FF5B00]">TAX INVOICE</code>
-                <h3 className="text-xl font-bold text-white mt-1">{viewInvoice.invoice_number}</h3>
-                <p className="text-xs text-ink-muted">
-                  Date: {new Date(viewInvoice.issued_at).toLocaleDateString("en-IN")}
+                <span className="text-xs font-semibold text-[#FF5B00] uppercase">Tax Invoice Document</span>
+                <h3 className="text-lg font-bold text-white mt-0.5">{viewInvoice.invoice_number}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+                  title="Print or export as PDF"
+                >
+                  <Printer className="h-4 w-4" />
+                  <span>Download PDF / Print</span>
+                </button>
+                <a
+                  href={getInvoiceWhatsAppShareUrl(viewInvoice.invoice_number, viewInvoice.company_name, Number(viewInvoice.total_inr))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span>Share on WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setViewInvoice(null)}
+                  className="rounded-lg border border-border-subtle bg-surface-elevated p-1.5 text-ink-muted hover:text-white"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Document Body */}
+            <div className="printable-document space-y-6 rounded-xl border border-border-subtle bg-surface-elevated/40 p-6 text-xs text-ink-secondary">
+              {/* Clean Verification Header */}
+              {viewInvoice.watermark_enabled && (
+                <div className="rounded bg-emerald-500/10 border border-emerald-500/20 p-2 text-xs text-emerald-300 text-center font-medium">
+                  Verified Tax Invoice • Powered by CreateKar
+                </div>
+              )}
+
+              <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+                <div>
+                  <code className="text-xs font-bold text-[#FF5B00]">TAX INVOICE</code>
+                  <h3 className="text-xl font-bold text-white mt-1">{viewInvoice.invoice_number}</h3>
+                  <p className="text-xs text-ink-muted">
+                    Date: {new Date(viewInvoice.issued_at).toLocaleDateString("en-IN")}
+                  </p>
+                </div>
+                <div className="text-right text-xs">
+                  <span className="font-semibold text-white block">SAC Code: 998311</span>
+                  <span className="text-ink-muted">Advertising &amp; Promotion Services</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1">
+                  <span className="text-ink-muted block text-[11px] font-semibold">Billed By (Creator)</span>
+                  <p className="font-bold text-white">{profile.name}</p>
+                  <p className="text-ink-secondary">GSTIN: {profile.gstin || "Unregistered / Composition"}</p>
+                  {profile.billing_address && <p className="text-ink-muted text-[11px]">{profile.billing_address}</p>}
+                </div>
+                <div className="space-y-1 text-right">
+                  <span className="text-ink-muted block text-[11px] font-semibold">Billed To (Client / Agency)</span>
+                  <p className="font-bold text-white">{viewInvoice.company_name}</p>
+                  <p className="text-ink-secondary">GSTIN: {viewInvoice.agency_gstin || "29AABCN5678F1Z1"}</p>
+                </div>
+              </div>
+
+              {/* Line items */}
+              <div data-ui="table-wrapper" className="border border-border-subtle rounded-lg overflow-hidden text-xs">
+                <table className="w-full text-left">
+                  <thead className="bg-surface-elevated text-ink-muted text-[11px]">
+                    <tr>
+                      <th className="p-3">Description</th>
+                      <th className="p-3 text-right">Amount (INR)</th>
+                    </tr>
+                  </thead>
+                  <tbody data-ui="table-body" className="divide-y divide-border-subtle">
+                    <tr>
+                      <td className="p-3 text-white">
+                        Creator Campaign Services ({viewInvoice.contract_title || "Influencer Collaboration"})
+                      </td>
+                      <td className="p-3 text-right tabular-nums text-white">
+                        ₹{Number(viewInvoice.taxable_value_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 text-ink-muted">CGST (9%)</td>
+                      <td className="p-3 text-right tabular-nums text-ink-muted">
+                        ₹{Number(viewInvoice.cgst_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 text-ink-muted">SGST (9%)</td>
+                      <td className="p-3 text-right tabular-nums text-ink-muted">
+                        ₹{Number(viewInvoice.sgst_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                    <tr className="bg-surface-elevated font-bold text-white">
+                      <td className="p-3">Total Amount Payable</td>
+                      <td className="p-3 text-right tabular-nums text-[#FF5B00]">
+                        ₹{Number(viewInvoice.total_inr).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Payment Settlement Coordinates */}
+              <div className="rounded-lg border border-border-subtle bg-surface p-3.5 space-y-1 text-xs">
+                <span className="font-semibold text-white block">Remittance Details</span>
+                <p className="text-ink-muted">
+                  Beneficiary: {profile.name} • UPI: {profile.upi_id || editUpiId || "Registered with CreateKar"}
+                </p>
+                <p className="text-[11px] text-ink-secondary">
+                  Status: {viewInvoice.status} • Protected via CreateKar Payment Protection
                 </p>
               </div>
-              <div className="text-right text-xs">
-                <span className="font-semibold text-white block">SAC Code: 998361</span>
-                <span className="text-ink-muted">Advertising &amp; Promotion Services</span>
-              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <span className="text-ink-muted block text-[11px] font-semibold">Billed By (Creator)</span>
-                <p className="font-bold text-white">{profile.name}</p>
-                <p className="text-ink-secondary">GSTIN: {profile.gstin || "Unregistered / Composition"}</p>
-              </div>
-              <div className="space-y-1 text-right">
-                <span className="text-ink-muted block text-[11px] font-semibold">Billed To (Agency)</span>
-                <p className="font-bold text-white">{viewInvoice.company_name}</p>
-                <p className="text-ink-secondary">GSTIN: {viewInvoice.agency_gstin || "29AABCN5678F1Z1"}</p>
-              </div>
-            </div>
-
-            {/* Line items */}
-            <div data-ui="table-wrapper" className="border border-border-subtle rounded-lg overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-surface-elevated text-ink-muted text-[11px]">
-                  <tr>
-                    <th className="p-3">Description</th>
-                    <th className="p-3 text-right">Amount (INR)</th>
-                  </tr>
-                </thead>
-                <tbody data-ui="table-body" className="divide-y divide-border-subtle">
-                  <tr>
-                    <td className="p-3 text-white">
-                      Creator Campaign Services ({viewInvoice.contract_title})
-                    </td>
-                    <td className="p-3 text-right tabular-nums text-white">
-                      ₹{Number(viewInvoice.taxable_value_inr).toLocaleString("en-IN")}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-ink-muted">CGST (9%)</td>
-                    <td className="p-3 text-right tabular-nums text-ink-muted">
-                      ₹{Number(viewInvoice.cgst_inr).toLocaleString("en-IN")}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-ink-muted">SGST (9%)</td>
-                    <td className="p-3 text-right tabular-nums text-ink-muted">
-                      ₹{Number(viewInvoice.sgst_inr).toLocaleString("en-IN")}
-                    </td>
-                  </tr>
-                  <tr className="bg-surface-elevated font-bold text-white">
-                    <td className="p-3">Total Amount Payable</td>
-                    <td className="p-3 text-right tabular-nums text-[#FF5B00]">
-                      ₹{Number(viewInvoice.total_inr).toLocaleString("en-IN")}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-[11px] text-ink-muted">
-                Status: {viewInvoice.status} • Payment settled via CreateKar Escrow
-              </span>
+            {/* Bottom Bar (hidden on print) */}
+            <div data-ui="divider" className="no-print flex items-center justify-end pt-2 border-t border-border-subtle">
               <button
+                type="button"
                 onClick={() => setViewInvoice(null)}
                 className="rounded-lg bg-surface-elevated border border-border-subtle px-4 py-2 text-xs font-semibold text-white hover:border-[#FF5B00]"
               >
@@ -2298,7 +2558,7 @@ export default function CreatorDashboard() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-ink-primary">Advance Escrow (%)</label>
+                    <label className="text-xs font-medium text-ink-primary">Protected Advance (%)</label>
                     <select
                       value={contractAdvancePercent}
                       onChange={(e) => setContractAdvancePercent(e.target.value)}
@@ -2307,7 +2567,7 @@ export default function CreatorDashboard() {
                       <option value="25">25% Advance</option>
                       <option value="50">50% Advance (Standard)</option>
                       <option value="75">75% Advance</option>
-                      <option value="100">100% Upfront Escrow</option>
+                      <option value="100">100% Upfront Advance</option>
                     </select>
                   </div>
 
@@ -2318,7 +2578,7 @@ export default function CreatorDashboard() {
                       onChange={(e) => setContractPaymentMode(e.target.value as any)}
                       className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
                     >
-                      <option value="ESCROW_RAZORPAY">Razorpay Nodal Escrow</option>
+                      <option value="ESCROW_RAZORPAY">Razorpay Payment Protection (Recommended)</option>
                       <option value="DIRECT_P2P">Direct UPI / P2P Settlement</option>
                     </select>
                   </div>
@@ -2582,7 +2842,7 @@ export default function CreatorDashboard() {
                     <span>CreateKar Pro-Tip: Contract-Backed Billing</span>
                   </div>
                   <p>
-                    CreateKar can make the finest invoices based on contracts! Linking invoices to contracts gives you advance escrow deposits, milestone tracking, and automated CBDT TDS accounting. Try the contracts feature next time if you like!
+                    CreateKar can make the finest invoices based on contracts! Linking invoices to contracts gives you protected advance deposits, milestone tracking, and automated CBDT TDS accounting. Try the contracts feature next time if you like!
                   </p>
                 </div>
               )}
@@ -2776,7 +3036,7 @@ export default function CreatorDashboard() {
                   <span>Contract Feature Recommendation</span>
                 </div>
                 <p>
-                  CreateKar can make the finest invoices based on contracts, try the contracts feature next time if you like! Contracts secure your advance escrow and handle compliance automatically.
+                  CreateKar can make the finest invoices based on contracts, try the contracts feature next time if you like! Contracts protect your advance and handle compliance automatically.
                 </p>
                 <div className="pt-1">
                   <button

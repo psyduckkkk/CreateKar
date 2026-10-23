@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   FileCheck2,
@@ -11,16 +12,19 @@ import {
   Lock,
   ArrowRight,
   ExternalLink,
-  Award
+  Award,
+  FileText,
+  Printer
 } from "lucide-react";
 import { CreateKarLogo } from "@/components/CreateKarLogo";
 
 export default function GuestContractSigningPage({
   params
 }: {
-  params: Promise<{ token: string }>;
+  params?: Promise<{ token: string }>;
 }) {
-  const { token } = use(params);
+  const routeParams = useParams();
+  const token = (routeParams?.token as string) || "";
   const [loading, setLoading] = useState(true);
   const [contractData, setContractData] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -34,13 +38,14 @@ export default function GuestContractSigningPage({
   const [updatedSha256, setUpdatedSha256] = useState("");
 
   useEffect(() => {
+    if (!token) return;
     async function fetchContract() {
       try {
         setLoading(true);
         const res = await fetch(`/api/public/contracts/${token}`);
         const data = await res.json();
         if (!res.ok) {
-          setErrorMessage(data.error || "Unable to load contract. The link may have expired.");
+          setErrorMessage(data.error || "Unable to load contract. The link may have expired or is invalid.");
           return;
         }
         setContractData(data.contract);
@@ -123,14 +128,22 @@ export default function GuestContractSigningPage({
           <Link href="/" className="flex items-center gap-2">
             <CreateKarLogo size="md" />
             <span className="hidden sm:inline text-xs text-ink-muted">
-              • Secure Guest Signing Portal
+              • Direct Contract Review &amp; Sign
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#1D62EA] transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5 text-[#1D62EA]" />
+              <span>Download PDF</span>
+            </button>
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded">
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span>Encrypted SHA-256 Record</span>
+              <span>Verified Digital Record</span>
             </span>
           </div>
         </div>
@@ -138,7 +151,7 @@ export default function GuestContractSigningPage({
 
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 space-y-8">
         {/* Banner Notice */}
-        <div className="rounded-xl border border-[#1D62EA]/30 bg-[#1D62EA]/10 p-4 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="rounded-xl border border-[#1D62EA]/30 bg-[#1D62EA]/10 p-4 text-xs text-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
           <div className="space-y-0.5">
             <span className="font-bold text-white block">
               You have been invited by {contractData.creator?.name} to review and sign this agreement.
@@ -153,7 +166,7 @@ export default function GuestContractSigningPage({
         </div>
 
         {/* Contract Summary Box */}
-        <div className="rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-6">
+        <div className="rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-6 printable-document">
           <div data-ui="divider" className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border-subtle pb-5">
             <div>
               <div className="flex items-center gap-2">
@@ -259,7 +272,7 @@ export default function GuestContractSigningPage({
                 </span>
               </div>
               <div className="rounded-lg bg-surface-elevated p-3">
-                <span className="text-[10px] text-ink-muted block">Advance Payment</span>
+                <span className="text-[10px] text-ink-muted block">Advance Deposit</span>
                 <span className="text-base font-bold tabular-nums text-[#FF5B00]">
                   ₹{Number(contractData.advanceAmountInr).toLocaleString("en-IN")} ({contractData.advancePercent}%)
                 </span>
@@ -279,11 +292,11 @@ export default function GuestContractSigningPage({
             </div>
 
             <div className="flex items-center justify-between rounded-lg bg-surface-elevated p-3 text-xs">
-              <span className="text-ink-secondary">Payment &amp; Escrow Mode:</span>
+              <span className="text-ink-secondary">Payment Protection:</span>
               <strong className="text-white">
                 {contractData.paymentMode === "ESCROW_RAZORPAY"
-                  ? "CreateKar Razorpay Route Nodal Escrow"
-                  : "Direct P2P UPI / Bank Transfer"}
+                  ? "Razorpay Payment Protection (Safe Advance Deposit)"
+                  : "Direct UPI / Bank Transfer"}
               </strong>
             </div>
           </div>

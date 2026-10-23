@@ -28,8 +28,8 @@ export default function Home() {
 
   const faqs = [
     {
-      q: "How does payment escrow protect me?",
-      a: "When a brand starts a campaign, their payment is deposited into a secure, bank-monitored escrow account. The creator knows the money is real and guaranteed before filming. Once the brand reviews and approves the deliverable, the money is instantly sent to the creator's bank account.",
+      q: "How does payment protection work?",
+      a: "When a brand starts a campaign, their payment is safely deposited into a secure, bank-monitored account. The creator knows the money is real and guaranteed before filming. Once the brand reviews and approves the deliverable, the money is instantly sent to the creator's bank account.",
     },
     {
       q: "Do creators need a registered company or GST number?",
@@ -41,7 +41,7 @@ export default function Home() {
     },
     {
       q: "What if there is a disagreement on the deliverables?",
-      a: "Contracts clearly state how many revisions are included. If a disagreement happens, funds stay securely locked in escrow while our support team steps in within 24 hours to help both sides reach a fair resolution.",
+      a: "Contracts clearly state how many revisions are included. If a disagreement happens, funds stay securely held in bank protection while our support team steps in within 24 hours to help both sides reach a fair resolution.",
     },
   ];
 
@@ -50,10 +50,10 @@ export default function Home() {
       {/* 1. HERO SECTION */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-3.5 py-1.5 text-xs text-ink-secondary">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-3.5 py-1.5 text-xs text-ink-secondary hover:border-[#FF5B00]/40 transition-[border-color] duration-200">
             <span className="h-2 w-2 rounded-full bg-[#FF5B00]" />
             <span className="font-medium text-ink-primary">
-              Creator Collaborations &amp; Escrow Payments in India
+              Creator Collaborations &amp; Payment Protection in India
             </span>
           </div>
 
@@ -63,7 +63,7 @@ export default function Home() {
 
           <p className="max-w-2xl text-lg text-ink-secondary leading-relaxed">
             Stop chasing unpaid invoices on WhatsApp and dealing with endless revisions.
-            CreateKar holds advance payments in safe escrow, signs digital agreements in 2 minutes,
+            CreateKar protects advance payments in a safe bank hold, signs digital agreements in 2 minutes,
             and sends money to your bank the moment work is approved.
           </p>
 
@@ -141,7 +141,7 @@ export default function Home() {
             </div>
 
             {/* The CreateKar Way */}
-            <div className="rounded-xl border border-[#FF5B00]/40 bg-surface-elevated p-6 space-y-4 relative">
+            <div className="rounded-xl border border-[#FF5B00]/40 bg-surface-elevated p-6 space-y-4 relative hover:-translate-y-1 hover:border-[#FF5B00]/70 transition-[transform,border-color] duration-200">
               <div className="flex items-center gap-2 text-[#FF5B00] font-semibold text-sm">
                 <CheckCircle2 className="h-5 w-5 shrink-0" />
                 <span>The CreateKar Way (Safe &amp; Professional)</span>
@@ -149,7 +149,7 @@ export default function Home() {
               <ul className="space-y-3 text-xs text-ink-primary leading-relaxed">
                 <li className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-[#FF5B00] shrink-0 mt-0.5" />
-                  <span><strong>Advance locked in escrow:</strong> Money is in a safe bank account before filming starts.</span>
+                  <span><strong>Advance safely protected:</strong> Money is in a safe bank account before filming starts.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-[#FF5B00] shrink-0 mt-0.5" />
@@ -223,22 +223,22 @@ export default function Home() {
                   Focus on making great content. We handle the business.
                 </h3>
                 <p className="text-xs text-ink-secondary mt-2 leading-relaxed">
-                  Never worry about unpaid brand deals again. See real money deposited into escrow before you touch your camera.
+                  Never worry about unpaid brand deals again. See real money safely deposited before you touch your camera.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF5B00]/10 text-[#FF5B00]">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <h4 className="text-base font-semibold text-white">Guaranteed Payouts</h4>
                   <p className="text-xs text-ink-secondary leading-relaxed">
-                    Brand deposits your payment into escrow upfront. Once your video is approved, payout is released immediately.
+                    Brand deposits your payment safely into bank hold upfront. Once your video is approved, payout is released immediately.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF5B00]/10 text-[#FF5B00]">
                     <Clock className="h-5 w-5" />
                   </div>
@@ -248,7 +248,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FF5B00]/10 text-[#FF5B00]">
                     <MessageSquare className="h-5 w-5" />
                   </div>
@@ -296,17 +296,17 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1D62EA]/10 text-[#1D62EA]">
                     <FileCheck className="h-5 w-5" />
                   </div>
                   <h4 className="text-base font-semibold text-white">Zero Ghosting Risk</h4>
                   <p className="text-xs text-ink-secondary leading-relaxed">
-                    Escrow funds are only released after you review and approve the submitted video drafts and proofs.
+                    Protected funds are only released after you review and approve the submitted video drafts and proofs.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1D62EA]/10 text-[#1D62EA]">
                     <FileText className="h-5 w-5" />
                   </div>
@@ -316,7 +316,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3">
+                <div className="rounded-xl border border-border-subtle bg-surface-elevated p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1D62EA]/10 text-[#1D62EA]">
                     <Sparkles className="h-5 w-5" />
                   </div>
@@ -356,7 +356,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3">
+          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
             <span className="text-xs font-semibold text-[#FF5B00]">1. Agreement</span>
             <h3 className="text-lg font-bold text-white">Agree &amp; Sign</h3>
             <p className="text-xs text-ink-secondary leading-relaxed">
@@ -364,15 +364,15 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3">
-            <span className="text-xs font-semibold text-[#FF5B00]">2. Safe Vault</span>
-            <h3 className="text-lg font-bold text-white">Lock Advance in Escrow</h3>
+          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
+            <span className="text-xs font-semibold text-[#FF5B00]">2. Protected Advance</span>
+            <h3 className="text-lg font-bold text-white">Deposit Advance Safely</h3>
             <p className="text-xs text-ink-secondary leading-relaxed">
-              The brand deposits the agreed advance into safe bank escrow. Creator gets notified immediately and begins production.
+              The brand deposits the agreed advance into safe bank protection. Creator gets notified immediately and begins production.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3">
+          <div className="rounded-xl border border-border-subtle bg-surface p-6 space-y-3 hover:-translate-y-1 hover:border-border-strong transition-[transform,border-color] duration-200">
             <span className="text-xs font-semibold text-[#FF5B00]">3. Instant Payout</span>
             <h3 className="text-lg font-bold text-white">Approve &amp; Release</h3>
             <p className="text-xs text-ink-secondary leading-relaxed">

@@ -185,8 +185,11 @@ export async function POST(request: Request) {
       [session.userId]
     );
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://createkar.com";
-    const publicSigningUrl = `${appUrl}/contracts/sign/${guestSignToken}`;
+    const originHeader = request.headers.get("origin");
+    const hostHeader = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const protoHeader = request.headers.get("x-forwarded-proto") || "https";
+    const resolvedOrigin = originHeader || (hostHeader ? `${protoHeader}://${hostHeader}` : (process.env.NEXT_PUBLIC_APP_URL || "https://createkar.com"));
+    const publicSigningUrl = `${resolvedOrigin}/contracts/sign/${guestSignToken}`;
 
     return NextResponse.json({
       success: true,

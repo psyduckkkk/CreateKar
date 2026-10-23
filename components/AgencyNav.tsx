@@ -52,7 +52,6 @@ export function AgencyNav({
     { id: "deals", label: "Deals & Contracts", icon: FileCheck2 },
     { id: "reviews", label: "Deliverable Reviews", icon: Video },
     { id: "invoices", label: "GST Invoices", icon: Receipt },
-    { id: "profile", label: "Company Profile", icon: Building2 },
     { id: "settings", label: "Agency Plans", icon: Settings }
   ];
 
@@ -68,7 +67,7 @@ export function AgencyNav({
                 CreateKar
               </span>
               <span className="text-[10px] text-ink-muted leading-tight mt-0.5">
-                Agency Escrow Hub
+                Brand &amp; Campaign Hub
               </span>
             </div>
           </Link>
@@ -96,15 +95,24 @@ export function AgencyNav({
           </nav>
         </div>
 
-        {/* Agency Identity & Actions */}
+        {/* Agency Identity & Actions (Badge opens Company Profile) */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 rounded-lg bg-surface-elevated px-3 py-1.5 border border-border-subtle text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab("profile")}
+            title="Open Company Profile &amp; Statutory Info"
+            className={`hidden sm:flex items-center gap-2 rounded-xl px-3 py-1.5 border text-xs transition-colors ${
+              activeTab === "profile"
+                ? "border-[#1D62EA] bg-[#1D62EA]/15 ring-1 ring-[#1D62EA]/40 text-white"
+                : "border-border-subtle bg-surface-elevated text-ink-secondary hover:text-white hover:border-[#1D62EA]"
+            }`}
+          >
             <Building2 className="h-3.5 w-3.5 text-[#1D62EA]" />
             <span className="font-semibold text-white max-w-[140px] truncate">{companyName}</span>
-            <span className="rounded bg-[#1D62EA]/15 text-[#1D62EA] px-1.5 py-0.5 text-[10px] font-bold uppercase">
-              {planTier}
+            <span className="rounded bg-[#1D62EA]/20 text-[#1D62EA] px-1.5 py-0.5 text-[10px] font-bold uppercase">
+              {planTier} • Profile
             </span>
-          </div>
+          </button>
 
           <button
             onClick={handleLogout}
@@ -129,12 +137,19 @@ export function AgencyNav({
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-border-subtle bg-surface px-4 py-4 space-y-2" data-ui="mobile-menu">
-          <div className="pb-2 border-b border-border-subtle flex items-center justify-between text-xs" data-ui="mobile-user">
-            <span className="font-bold text-white">{companyName}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("profile");
+              setMobileMenuOpen(false);
+            }}
+            className="w-full p-2.5 rounded-lg bg-surface-elevated flex items-center justify-between text-xs text-left mb-2"
+          >
+            <span className="font-bold text-white">{companyName} (Company Profile)</span>
             <span className="rounded bg-[#1D62EA]/15 text-[#1D62EA] px-2 py-0.5 text-[10px] font-bold uppercase">
               {planTier} Plan
             </span>
-          </div>
+          </button>
           <div className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;

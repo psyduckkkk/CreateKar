@@ -90,7 +90,7 @@ export function CreatorNav({
                   : "text-ink-secondary hover:text-white"
               }`}
             >
-              Payments &amp; Escrow
+              Payments &amp; Payouts
             </button>
             <button
               onClick={() => setActiveTab("plan")}
@@ -102,22 +102,21 @@ export function CreatorNav({
             >
               Plan &amp; Boost
             </button>
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`rounded-lg px-3 py-1.5 transition-colors ${
-                activeTab === "profile"
-                  ? "bg-surface-elevated text-white font-semibold"
-                  : "text-ink-secondary hover:text-white"
-              }`}
-            >
-              My Profile
-            </button>
           </nav>
         </div>
 
-        {/* User Profile & Badge */}
+        {/* User Profile Badge (Clickable to open My Profile) */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("profile")}
+            title="Open My Profile &amp; Settings"
+            className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 border transition-[border-color,background-color] text-left ${
+              activeTab === "profile"
+                ? "border-[#FF5B00] bg-surface-elevated ring-1 ring-[#FF5B00]/40"
+                : "border-border-subtle bg-surface-elevated/40 hover:bg-surface-elevated hover:border-border-strong"
+            }`}
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-elevated text-xs font-bold text-[#FF5B00] border border-border-strong">
               {creatorName ? creatorName.charAt(0) : "C"}
             </div>
@@ -138,12 +137,12 @@ export function CreatorNav({
                   </span>
                 ) : (
                   <span className="text-[10px] text-ink-muted capitalize">
-                    {planTier} Plan
+                    {planTier} Plan • Profile
                   </span>
                 )}
               </div>
             </div>
-          </div>
+          </button>
 
           <button
             onClick={handleLogout}
