@@ -10,7 +10,10 @@ export async function GET() {
     }
 
     const contracts = await query(
-      `SELECT c.*, u.name as agency_name, a.company_name, a.gstin as agency_gstin,
+      `SELECT c.*,
+              COALESCE(a.company_name, c.client_company, u.name, 'Client Agency') as company_name,
+              COALESCE(u.name, c.client_name, 'Agency Representative') as agency_name,
+              COALESCE(a.gstin, '') as agency_gstin,
               json_agg(
                 json_build_object(
                   'id', d.id,
@@ -22,8 +25,8 @@ export async function GET() {
                 )
               ) FILTER (WHERE d.id IS NOT NULL) as deliverables
        FROM contracts c
-       JOIN users u ON c.agency_id = u.id
-       JOIN agency_profiles a ON c.agency_id = a.user_id
+       LEFT JOIN users u ON c.agency_id = u.id
+       LEFT JOIN agency_profiles a ON c.agency_id = a.user_id
        LEFT JOIN deliverables d ON c.id = d.contract_id
        WHERE c.creator_id = $1
        GROUP BY c.id, u.name, a.company_name, a.gstin

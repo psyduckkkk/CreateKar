@@ -11,7 +11,10 @@ export async function GET() {
 
     // 1. Fetch Creator Profile
     const profileRows = await query(
-      `SELECT * FROM creator_profiles WHERE user_id = $1`,
+      `SELECT cp.*, u.phone, u.name as user_name, u.email as user_email
+       FROM creator_profiles cp
+       JOIN users u ON cp.user_id = u.id
+       WHERE cp.user_id = $1`,
       [session.userId]
     );
     const profile = profileRows[0] || {};
@@ -41,10 +44,12 @@ export async function GET() {
 
     // 4. Fetch Recent Contracts
     const recentContracts = await query(
-      `SELECT c.*, u.name as agency_name, a.company_name
+      `SELECT c.*,
+              COALESCE(u.name, c.client_name, 'Agency Representative') as agency_name,
+              COALESCE(a.company_name, c.client_company, u.name, 'Client Agency') as company_name
        FROM contracts c
-       JOIN users u ON c.agency_id = u.id
-       JOIN agency_profiles a ON c.agency_id = a.user_id
+       LEFT JOIN users u ON c.agency_id = u.id
+       LEFT JOIN agency_profiles a ON c.agency_id = a.user_id
        WHERE c.creator_id = $1
        ORDER BY c.created_at DESC
        LIMIT 5`,
@@ -55,8 +60,9 @@ export async function GET() {
       success: true,
       profile: {
         ...profile,
-        name: session.name,
-        email: session.email,
+        name: profile.user_name || session.name,
+        email: profile.user_email || session.email,
+        phone: profile.phone || "",
         freeContractsRemaining: Math.max(0, 5 - (profile.contracts_created_count || 0)),
         isBoostActive: profile.boost_active_until ? new Date(profile.boost_active_until) > new Date() : false,
       },

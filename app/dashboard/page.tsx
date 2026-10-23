@@ -17,13 +17,24 @@ import {
   AlertCircle,
   Copy,
   X,
+  Plus,
+  Share2,
+  Receipt,
+  UserCheck,
+  ArrowRight,
+  TrendingUp,
+  ShieldCheck,
+  FileCheck2,
+  Phone,
+  Mail
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function CreatorDashboard() {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan"
+    "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan" | "profile"
   >("overview");
+  const [profileSubTab, setProfileSubTab] = useState<"profile" | "contracts" | "invoices" | "earnings">("profile");
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>({});
@@ -32,6 +43,7 @@ export default function CreatorDashboard() {
   const [deliverables, setDeliverables] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [payouts, setPayouts] = useState<any>({ transactions: [], payoutDetails: {} });
+  const [registeredAgencies, setRegisteredAgencies] = useState<any[]>([]);
 
   // Modals state
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
@@ -46,8 +58,62 @@ export default function CreatorDashboard() {
   const [editIfsc, setEditIfsc] = useState("");
   const [savingBank, setSavingBank] = useState(false);
 
+  // Full Profile editing state
+  const [profileName, setProfileName] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [profileNiche, setProfileNiche] = useState("Tech & AI");
+  const [profileInstagram, setProfileInstagram] = useState("");
+  const [profileYoutube, setProfileYoutube] = useState("");
+  const [profileBaseRate, setProfileBaseRate] = useState("");
+  const [profilePan, setProfilePan] = useState("");
+  const [profileGstin, setProfileGstin] = useState("");
+  const [profileBillingAddress, setProfileBillingAddress] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+
   // Invoice viewer modal
   const [viewInvoice, setViewInvoice] = useState<any>(null);
+
+  // Create Contract modal state
+  const [createContractModalOpen, setCreateContractModalOpen] = useState(false);
+  const [contractClientType, setContractClientType] = useState<"EXTERNAL" | "REGISTERED">("EXTERNAL");
+  const [contractAgencyId, setContractAgencyId] = useState("");
+  const [contractClientCompany, setContractClientCompany] = useState("");
+  const [contractClientName, setContractClientName] = useState("");
+  const [contractClientEmail, setContractClientEmail] = useState("");
+  const [contractClientPhone, setContractClientPhone] = useState("");
+  const [contractTitle, setContractTitle] = useState("");
+  const [contractBrief, setContractBrief] = useState("");
+  const [contractGross, setContractGross] = useState("50000");
+  const [contractAdvancePercent, setContractAdvancePercent] = useState("50");
+  const [contractPaymentMode, setContractPaymentMode] = useState<"ESCROW_RAZORPAY" | "DIRECT_P2P">("ESCROW_RAZORPAY");
+  const [contractTdsSection, setContractTdsSection] = useState("NONE");
+  const [contractDeliverables, setContractDeliverables] = useState<Array<{ type: string; description: string; deadline: string }>>([
+    { type: "Instagram Reel", description: "1x 60s Reel with product integration", deadline: "" }
+  ]);
+  const [creatingContract, setCreatingContract] = useState(false);
+
+  // Contract Share Modal state
+  const [contractShareModalOpen, setContractShareModalOpen] = useState(false);
+  const [createdContractData, setCreatedContractData] = useState<any | null>(null);
+
+  // Create Invoice modal state
+  const [createInvoiceModalOpen, setCreateInvoiceModalOpen] = useState(false);
+  const [invoiceSource, setInvoiceSource] = useState<"CONTRACT" | "STANDALONE">("CONTRACT");
+  const [invoiceContractId, setInvoiceContractId] = useState("");
+  const [invoiceClientCompany, setInvoiceClientCompany] = useState("");
+  const [invoiceClientName, setInvoiceClientName] = useState("");
+  const [invoiceClientEmail, setInvoiceClientEmail] = useState("");
+  const [invoiceClientGstin, setInvoiceClientGstin] = useState("");
+  const [invoiceClientAddress, setInvoiceClientAddress] = useState("");
+  const [invoiceServiceDesc, setInvoiceServiceDesc] = useState("Creator Campaign & Content Services");
+  const [invoiceSacCode, setInvoiceSacCode] = useState("998311");
+  const [invoiceTaxableValue, setInvoiceTaxableValue] = useState("50000");
+  const [invoiceTdsSection, setInvoiceTdsSection] = useState("NONE");
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+  const [invoiceShareModalOpen, setInvoiceShareModalOpen] = useState(false);
+  const [createdInvoiceData, setCreatedInvoiceData] = useState<any | null>(null);
+  const [showUpsellBanner, setShowUpsellBanner] = useState(false);
 
   // Negotiation modal
   const [selectedContractForNegotiation, setSelectedContractForNegotiation] = useState<any | null>(null);
@@ -102,17 +168,28 @@ export default function CreatorDashboard() {
     try {
       setLoading(true);
 
-      const [overviewRes, contractsRes, delivRes, invRes, payoutsRes] = await Promise.all([
+      const [overviewRes, contractsRes, delivRes, invRes, payoutsRes, agenciesRes] = await Promise.all([
         fetch("/api/creator/overview").then((r) => r.json()),
         fetch("/api/creator/contracts").then((r) => r.json()),
         fetch("/api/creator/deliverables").then((r) => r.json()),
         fetch("/api/creator/invoices").then((r) => r.json()),
         fetch("/api/creator/payouts").then((r) => r.json()),
+        fetch("/api/creator/agencies").then((r) => r.json()).catch(() => ({ agencies: [] }))
       ]);
 
       if (overviewRes.success) {
         setProfile(overviewRes.profile || {});
         setStats(overviewRes.stats || {});
+        setProfileName(overviewRes.profile?.name || "");
+        setProfilePhone(overviewRes.profile?.phone || "");
+        setProfileBio(overviewRes.profile?.bio || "");
+        setProfileNiche(overviewRes.profile?.niche || "Tech & AI");
+        setProfileInstagram(overviewRes.profile?.instagram_handle || "");
+        setProfileYoutube(overviewRes.profile?.youtube_handle || "");
+        setProfileBaseRate(overviewRes.profile?.base_rate_inr ? String(overviewRes.profile?.base_rate_inr) : "");
+        setProfilePan(overviewRes.profile?.pan || "");
+        setProfileGstin(overviewRes.profile?.gstin || "");
+        setProfileBillingAddress(overviewRes.profile?.billing_address || "");
       }
       if (contractsRes.success) {
         setContracts(contractsRes.contracts || []);
@@ -122,12 +199,18 @@ export default function CreatorDashboard() {
       }
       if (invRes.success) {
         setInvoices(invRes.invoices || []);
+        if (invRes.invoices?.some((i: any) => i.is_standalone)) {
+          setShowUpsellBanner(true);
+        }
       }
       if (payoutsRes.success) {
         setPayouts(payoutsRes);
         setEditUpiId(payoutsRes.payoutDetails?.upi_id || "");
         setEditBankAccount(payoutsRes.payoutDetails?.bank_account_number || "");
         setEditIfsc(payoutsRes.payoutDetails?.bank_ifsc || "");
+      }
+      if (agenciesRes && agenciesRes.agencies) {
+        setRegisteredAgencies(agenciesRes.agencies);
       }
     } catch (err) {
       console.error("Dashboard load error:", err);
@@ -253,6 +336,193 @@ export default function CreatorDashboard() {
     return `https://wa.me/?text=${text}`;
   };
 
+  // 6. Generate Contract WhatsApp Share Link
+  const getContractWhatsAppShareUrl = (signingUrl: string, clientName: string, title: string, amount: number) => {
+    const text = encodeURIComponent(
+      `Hi ${clientName || "Partner"}, here is the collaboration agreement for "${title}" (Value: ₹${amount.toLocaleString("en-IN")}) on CreateKar: ${signingUrl}. Review and sign instantly with SHA-256 seal (no login required). Thank you!`
+    );
+    return `https://wa.me/?text=${text}`;
+  };
+
+  // 7. Generate Invoice WhatsApp Share Link
+  const getInvoiceWhatsAppShareUrl = (invoiceNumber: string, clientName: string, total: number) => {
+    const text = encodeURIComponent(
+      `Hi ${clientName || "Partner"}, please find tax invoice ${invoiceNumber} for ₹${total.toLocaleString("en-IN")} via CreateKar. Thank you!`
+    );
+    return `https://wa.me/?text=${text}`;
+  };
+
+  // 8. Handle Create Contract
+  const handleCreateContract = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contractTitle.trim() || !contractBrief.trim() || !contractGross) {
+      toast.error("Please fill in contract title, brief, and gross amount.");
+      return;
+    }
+    if (contractClientType === "EXTERNAL" && !contractClientCompany.trim()) {
+      toast.error("Please enter the client or agency company name.");
+      return;
+    }
+    setCreatingContract(true);
+    try {
+      const res = await fetch("/api/creator/contracts/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_type: contractClientType,
+          agency_id: contractClientType === "REGISTERED" ? contractAgencyId : undefined,
+          client_company: contractClientCompany.trim(),
+          client_name: contractClientName.trim(),
+          client_email: contractClientEmail.trim(),
+          client_phone: contractClientPhone.trim(),
+          title: contractTitle.trim(),
+          campaign_brief: contractBrief.trim(),
+          gross_amount_inr: Number(contractGross),
+          advance_percent: Number(contractAdvancePercent),
+          payment_mode: contractPaymentMode,
+          tds_section: contractTdsSection,
+          deliverables: contractDeliverables.filter((d) => d.type.trim())
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to create contract proposal");
+        setCreatingContract(false);
+        return;
+      }
+      toast.success("Contract proposal generated & sealed!");
+      setCreateContractModalOpen(false);
+      setCreatedContractData({
+        contractNumber: data.contractNumber,
+        publicSigningUrl: data.publicSigningUrl || `${window.location.origin}/contracts/sign/${data.guestSignToken}`,
+        clientCompany: data.clientCompany,
+        clientName: contractClientName,
+        clientPhone: contractClientPhone,
+        clientEmail: contractClientEmail,
+        grossAmount: Number(contractGross),
+        title: contractTitle,
+        sha256Digest: data.sha256Digest
+      });
+      setContractShareModalOpen(true);
+      // Reset form fields
+      setContractTitle("");
+      setContractBrief("");
+      setContractClientCompany("");
+      setContractClientEmail("");
+      setContractClientPhone("");
+      loadData();
+    } catch {
+      toast.error("Network error creating contract");
+    } finally {
+      setCreatingContract(false);
+    }
+  };
+
+  // 9. Pre-fill Invoice details from selected contract
+  const handleSelectContractForInvoice = (contractId: string) => {
+    setInvoiceContractId(contractId);
+    const selected = contracts.find((c) => c.id === contractId);
+    if (selected) {
+      setInvoiceClientCompany(selected.company_name || selected.client_company || "");
+      setInvoiceClientName(selected.client_name || selected.agency_name || "");
+      setInvoiceClientEmail(selected.client_email || "");
+      setInvoiceClientGstin(selected.agency_gstin || "");
+      setInvoiceTaxableValue(String(selected.gross_amount_inr || ""));
+      setInvoiceServiceDesc(`Creator Collaboration Services - ${selected.title}`);
+      setInvoiceTdsSection(selected.tds_section || "NONE");
+    }
+  };
+
+  // 10. Handle Create Invoice
+  const handleCreateInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (invoiceSource === "CONTRACT" && !invoiceContractId) {
+      toast.error("Please select a contract to base this invoice on.");
+      return;
+    }
+    if (invoiceSource === "STANDALONE" && (!invoiceClientCompany.trim() || !invoiceTaxableValue)) {
+      toast.error("Please enter the client company name and taxable value.");
+      return;
+    }
+    setCreatingInvoice(true);
+    try {
+      const res = await fetch("/api/creator/invoices/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: invoiceSource,
+          contract_id: invoiceSource === "CONTRACT" ? invoiceContractId : undefined,
+          client_company: invoiceClientCompany.trim(),
+          client_name: invoiceClientName.trim(),
+          client_email: invoiceClientEmail.trim(),
+          client_gstin: invoiceClientGstin.trim(),
+          client_address: invoiceClientAddress.trim(),
+          service_description: invoiceServiceDesc.trim(),
+          sac_code: invoiceSacCode.trim() || "998311",
+          taxable_value_inr: Number(invoiceTaxableValue),
+          tds_section: invoiceTdsSection
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to generate invoice");
+        setCreatingInvoice(false);
+        return;
+      }
+      toast.success("Tax Invoice generated successfully!");
+      setCreateInvoiceModalOpen(false);
+      setCreatedInvoiceData(data);
+      setInvoiceShareModalOpen(true);
+      if (data.isStandalone) {
+        setShowUpsellBanner(true);
+      }
+      loadData();
+    } catch {
+      toast.error("Network error creating invoice");
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
+
+  // 11. Handle Save Full Profile
+  const handleSaveFullProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      const res = await fetch("/api/creator/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profileName.trim(),
+          phone: profilePhone.trim(),
+          bio: profileBio.trim(),
+          niche: profileNiche.trim(),
+          instagram_handle: profileInstagram.trim(),
+          youtube_handle: profileYoutube.trim(),
+          base_rate_inr: profileBaseRate ? Number(profileBaseRate) : undefined,
+          pan: profilePan.trim().toUpperCase(),
+          gstin: profileGstin.trim().toUpperCase(),
+          billing_address: profileBillingAddress.trim(),
+          upi_id: editUpiId.trim(),
+          bank_account_number: editBankAccount.trim(),
+          bank_ifsc: editIfsc.trim().toUpperCase()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to update profile");
+        setSavingProfile(false);
+        return;
+      }
+      toast.success("Profile, tax details, and payout coordinates saved!");
+      loadData();
+    } catch {
+      toast.error("Network error updating profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[70dvh] items-center justify-center text-xs text-ink-muted">
@@ -360,6 +630,24 @@ export default function CreatorDashboard() {
               </div>
             </div>
 
+            {/* Quick Actions Strip */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setCreateContractModalOpen(true)}
+                className="flex items-center gap-2 rounded-xl bg-[#FF5B00] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create New Contract</span>
+              </button>
+              <button
+                onClick={() => setCreateInvoiceModalOpen(true)}
+                className="flex items-center gap-2 rounded-xl border border-border-strong bg-surface-elevated px-4 py-2.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Generate Tax Invoice</span>
+              </button>
+            </div>
+
             {/* Actionable Contracts Pipeline */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -450,11 +738,20 @@ export default function CreatorDashboard() {
         {/* ======================================================== */}
         {activeTab === "contracts" && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-white">Campaign Contracts</h2>
-              <p className="text-xs text-ink-secondary mt-1">
-                All agreements sealed with SHA-256 cryptographic verification and statutory terms.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-white">Campaign Contracts</h2>
+                <p className="text-xs text-ink-secondary mt-1">
+                  All agreements sealed with SHA-256 cryptographic verification and statutory terms.
+                </p>
+              </div>
+              <button
+                onClick={() => setCreateContractModalOpen(true)}
+                className="flex items-center gap-2 rounded-lg bg-[#FF5B00] px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors shrink-0"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Contract</span>
+              </button>
             </div>
 
             <div className="space-y-4">
@@ -478,6 +775,28 @@ export default function CreatorDashboard() {
                       <span className="rounded bg-surface-elevated px-2.5 py-1 text-xs font-semibold text-white">
                         Status: {c.status}
                       </span>
+                      {c.guest_sign_token && (
+                        <button
+                          onClick={() => {
+                            setCreatedContractData({
+                              contractNumber: c.contract_number,
+                              publicSigningUrl: `${window.location.origin}/contracts/sign/${c.guest_sign_token}`,
+                              clientCompany: c.company_name || c.client_company,
+                              clientName: c.client_name,
+                              clientPhone: c.client_phone || "",
+                              clientEmail: c.client_email || "",
+                              grossAmount: c.gross_amount_inr,
+                              title: c.title,
+                              sha256Digest: c.sha256_digest
+                            });
+                            setContractShareModalOpen(true);
+                          }}
+                          className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                          <span>Share Sign Link</span>
+                        </button>
+                      )}
                       <button
                         onClick={() => handleOpenNegotiations(c)}
                         className="flex items-center gap-1 rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
@@ -631,32 +950,62 @@ export default function CreatorDashboard() {
         {/* ======================================================== */}
         {activeTab === "invoices" && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-white">GST Invoices</h2>
                 <p className="text-xs text-ink-secondary mt-1">
-                  Automated B2B tax invoices generated upon milestone release.
+                  Automated B2B tax invoices generated upon contract milestones or standalone engagements.
                 </p>
               </div>
 
-              {/* Watermark Rule Indicator */}
-              <div className="rounded-lg border border-border-strong bg-surface-elevated px-3 py-1.5 text-xs text-ink-muted">
-                {profile.plan_tier === "influencer" ? (
-                  <span className="text-amber-300 font-medium">
-                    Influencer Plan: Watermark-free clean GST Invoices
-                  </span>
-                ) : (
-                  <span>
-                    Invoices carry &quot;Powered by CreateKar&quot; watermark. (Influencer removes watermark).
-                  </span>
-                )}
+              <div className="flex items-center gap-2">
+                {/* Watermark Rule Indicator */}
+                <div className="rounded-lg border border-border-strong bg-surface-elevated px-3 py-1.5 text-xs text-ink-muted hidden md:block">
+                  {profile.plan_tier === "influencer" ? (
+                    <span className="text-amber-300 font-medium">
+                      Influencer Plan: Watermark-free clean GST Invoices
+                    </span>
+                  ) : (
+                    <span>
+                      Invoices carry &quot;Powered by CreateKar&quot; watermark.
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setCreateInvoiceModalOpen(true)}
+                  className="flex items-center gap-2 rounded-lg bg-[#FF5B00] px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Invoice</span>
+                </button>
               </div>
+            </div>
+
+            {/* Persistent Standalone Contract Upsell Banner */}
+            <div className="rounded-xl border border-border-strong bg-surface-elevated p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-ui="callout">
+              <div className="flex items-start gap-3">
+                <Sparkles className="h-4 w-4 text-[#FF5B00] shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="text-xs text-white font-semibold">
+                    CreateKar can make the finest invoices based on contracts!
+                  </p>
+                  <p className="text-xs text-ink-secondary">
+                    Linking invoices directly to contracts guarantees agreed advance escrow, automated milestone releases, and CBDT-compliant TDS schedules. Try the contracts feature next time if you like!
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCreateContractModalOpen(true)}
+                className="rounded-lg bg-surface border border-border-subtle px-3.5 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] shrink-0 transition-colors"
+              >
+                Create Contract
+              </button>
             </div>
 
             <div className="space-y-3">
               {invoices.length === 0 ? (
                 <div className="rounded-xl border border-border-subtle bg-surface p-8 text-center text-xs text-ink-muted">
-                  No invoices generated yet. Invoices generate automatically when campaign milestones are completed.
+                  No invoices generated yet. Generate an invoice from an existing contract or create a standalone invoice.
                 </div>
               ) : (
                 invoices.map((inv) => (
@@ -672,20 +1021,34 @@ export default function CreatorDashboard() {
                         <span className="rounded bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                           {inv.status}
                         </span>
+                        {inv.is_standalone && (
+                          <span className="rounded bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-ink-secondary border border-border-subtle">
+                            Standalone Invoice
+                          </span>
+                        )}
                       </div>
                       <h4 className="text-xs font-semibold text-white">{inv.company_name}</h4>
                       <p className="text-[11px] text-ink-muted">
-                        Contract: {inv.contract_title} ({inv.contract_number})
+                        {inv.contract_title} ({inv.contract_number}) • {inv.service_description || "Creator Services"}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end gap-6">
+                    <div className="flex items-center justify-between sm:justify-end gap-3">
                       <div className="text-right">
                         <span className="text-[10px] text-ink-muted block">Total (with GST)</span>
                         <span className="text-sm font-bold tabular-nums text-white">
                           ₹{Number(inv.total_inr).toLocaleString("en-IN")}
                         </span>
                       </div>
+
+                      <a
+                        href={getInvoiceWhatsAppShareUrl(inv.invoice_number, inv.company_name, Number(inv.total_inr))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-ink-secondary hover:text-white hover:border-[#FF5B00] transition-colors"
+                      >
+                        Share via WhatsApp
+                      </a>
 
                       <button
                         onClick={() => setViewInvoice(inv)}
@@ -1013,6 +1376,453 @@ export default function CreatorDashboard() {
             </div>
           </div>
         )}
+        {/* ======================================================== */}
+        {/* TAB 7: DEDICATED PROFILE SECTION */}
+        {/* ======================================================== */}
+        {activeTab === "profile" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-white">My Creator Profile &amp; Workspace</h2>
+                <p className="text-xs text-ink-secondary mt-1">
+                  Manage your public persona, statutory tax registration (PAN/GSTIN), payout coordinates, and campaign portfolio.
+                </p>
+              </div>
+
+              {/* Sub-section Navigation Pills */}
+              <div className="flex items-center gap-1.5 rounded-xl border border-border-subtle bg-surface p-1">
+                <button
+                  type="button"
+                  onClick={() => setProfileSubTab("profile")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    profileSubTab === "profile"
+                      ? "bg-[#FF5B00] text-white"
+                      : "text-ink-secondary hover:text-white"
+                  }`}
+                >
+                  Edit Profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfileSubTab("contracts")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    profileSubTab === "contracts"
+                      ? "bg-[#FF5B00] text-white"
+                      : "text-ink-secondary hover:text-white"
+                  }`}
+                >
+                  My Contracts ({contracts.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfileSubTab("invoices")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    profileSubTab === "invoices"
+                      ? "bg-[#FF5B00] text-white"
+                      : "text-ink-secondary hover:text-white"
+                  }`}
+                >
+                  My Invoices ({invoices.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfileSubTab("earnings")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    profileSubTab === "earnings"
+                      ? "bg-[#FF5B00] text-white"
+                      : "text-ink-secondary hover:text-white"
+                  }`}
+                >
+                  My Earnings
+                </button>
+              </div>
+            </div>
+
+            {/* Sub-section 1: Edit Profile Form */}
+            {profileSubTab === "profile" && (
+              <form onSubmit={handleSaveFullProfile} className="space-y-6">
+                {/* 1. Personal & Social Channels */}
+                <div className="rounded-xl border border-border-strong bg-surface p-6 space-y-4">
+                  <div data-ui="divider" className="flex items-center gap-2 text-white font-semibold text-sm border-b border-border-subtle pb-3">
+                    <UserCheck className="h-4 w-4 text-[#FF5B00]" />
+                    <span>Creator Identity &amp; Channel Reach</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Full Legal / Creator Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Primary Phone / WhatsApp</label>
+                      <input
+                        type="tel"
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Primary Content Niche</label>
+                      <select
+                        value={profileNiche}
+                        onChange={(e) => setProfileNiche(e.target.value)}
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      >
+                        <option value="Tech & AI">Tech &amp; AI</option>
+                        <option value="Finance & Wealth">Finance &amp; Wealth</option>
+                        <option value="Fitness & Nutrition">Fitness &amp; Nutrition</option>
+                        <option value="Beauty & Skincare">Beauty &amp; Skincare</option>
+                        <option value="Travel & Heritage">Travel &amp; Heritage</option>
+                        <option value="Gaming & Esports">Gaming &amp; Esports</option>
+                        <option value="Productivity & SaaS">Productivity &amp; SaaS</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Instagram Handle</label>
+                      <input
+                        type="text"
+                        value={profileInstagram}
+                        onChange={(e) => setProfileInstagram(e.target.value)}
+                        placeholder="@yourhandle"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">YouTube Channel Handle</label>
+                      <input
+                        type="text"
+                        value={profileYoutube}
+                        onChange={(e) => setProfileYoutube(e.target.value)}
+                        placeholder="@youtubechannel"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Base Collaboration Rate (INR)</label>
+                      <input
+                        type="number"
+                        value={profileBaseRate}
+                        onChange={(e) => setProfileBaseRate(e.target.value)}
+                        placeholder="25000"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Creator Bio / Profile Summary</label>
+                    <textarea
+                      rows={2}
+                      value={profileBio}
+                      onChange={(e) => setProfileBio(e.target.value)}
+                      placeholder="Brief overview of your channel audience and content style..."
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Tax & Statutory Information */}
+                <div className="rounded-xl border border-border-strong bg-surface p-6 space-y-4">
+                  <div data-ui="divider" className="flex items-center gap-2 text-white font-semibold text-sm border-b border-border-subtle pb-3">
+                    <Building2 className="h-4 w-4 text-[#FF5B00]" />
+                    <span>Statutory Tax &amp; Billing Coordinates</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Permanent Account Number (PAN)</label>
+                      <input
+                        type="text"
+                        value={profilePan}
+                        onChange={(e) => setProfilePan(e.target.value.toUpperCase())}
+                        placeholder="ABCDE1234F"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                      <span className="text-[10px] text-ink-muted">Mandatory for TDS credit certificates under Section 194C / 194J</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">GSTIN (Optional if under ₹20L exemption)</label>
+                      <input
+                        type="text"
+                        value={profileGstin}
+                        onChange={(e) => setProfileGstin(e.target.value.toUpperCase())}
+                        placeholder="27ABCDE1234F1Z5"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                      <span className="text-[10px] text-ink-muted">Required to issue formal tax invoices with 18% GST credit</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Registered Billing Address</label>
+                    <textarea
+                      rows={2}
+                      value={profileBillingAddress}
+                      onChange={(e) => setProfileBillingAddress(e.target.value)}
+                      placeholder="Your official residential or studio address printed on GST invoices..."
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Payout Accounts */}
+                <div className="rounded-xl border border-border-strong bg-surface p-6 space-y-4">
+                  <div data-ui="divider" className="flex items-center gap-2 text-white font-semibold text-sm border-b border-border-subtle pb-3">
+                    <Wallet className="h-4 w-4 text-[#FF5B00]" />
+                    <span>Payout Channels (UPI &amp; Bank Transfer)</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Primary UPI ID (VPA)</label>
+                      <input
+                        type="text"
+                        value={editUpiId}
+                        onChange={(e) => setEditUpiId(e.target.value)}
+                        placeholder="yourhandle@upi"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Bank Account Number</label>
+                      <input
+                        type="text"
+                        value={editBankAccount}
+                        onChange={(e) => setEditBankAccount(e.target.value)}
+                        placeholder="50100123456789"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-ink-primary">Bank IFSC Code</label>
+                      <input
+                        type="text"
+                        value={editIfsc}
+                        onChange={(e) => setEditIfsc(e.target.value.toUpperCase())}
+                        placeholder="HDFC0001234"
+                        className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end">
+                  <button
+                    type="submit"
+                    disabled={savingProfile}
+                    className="rounded-lg bg-[#FF5B00] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors disabled:opacity-50"
+                  >
+                    {savingProfile ? "Saving Profile..." : "Save Profile Details"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Sub-section 2: My Contracts */}
+            {profileSubTab === "contracts" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white">All Campaign Contracts ({contracts.length})</h3>
+                  <button
+                    onClick={() => setCreateContractModalOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Create Contract</span>
+                  </button>
+                </div>
+
+                {contracts.length === 0 ? (
+                  <div className="rounded-xl border border-border-subtle bg-surface p-8 text-center text-xs text-ink-muted">
+                    No contracts created yet. Use the Create Contract button to initiate a new collaboration.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {contracts.map((c) => (
+                      <div
+                        key={c.id}
+                        className="rounded-xl border border-border-subtle bg-surface p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs font-bold text-[#FF5B00]">{c.contract_number}</code>
+                            <span className="rounded bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-white">
+                              {c.status}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-semibold text-white">{c.title}</h4>
+                          <p className="text-xs text-ink-muted">Client: {c.company_name || c.client_company}</p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <span className="text-[10px] text-ink-muted block">Deal Value</span>
+                            <span className="text-sm font-bold tabular-nums text-white">
+                              ₹{Number(c.gross_amount_inr).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                          {c.guest_sign_token && (
+                            <button
+                              onClick={() => {
+                                setCreatedContractData({
+                                  contractNumber: c.contract_number,
+                                  publicSigningUrl: `${window.location.origin}/contracts/sign/${c.guest_sign_token}`,
+                                  clientCompany: c.company_name || c.client_company,
+                                  clientName: c.client_name,
+                                  clientPhone: c.client_phone || "",
+                                  clientEmail: c.client_email || "",
+                                  grossAmount: c.gross_amount_inr,
+                                  title: c.title,
+                                  sha256Digest: c.sha256_digest
+                                });
+                                setContractShareModalOpen(true);
+                              }}
+                              className="rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                            >
+                              Share Sign Link
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sub-section 3: My Invoices */}
+            {profileSubTab === "invoices" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white">Tax Invoices ({invoices.length})</h3>
+                  <button
+                    onClick={() => setCreateInvoiceModalOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Create Invoice</span>
+                  </button>
+                </div>
+
+                {invoices.length === 0 ? (
+                  <div className="rounded-xl border border-border-subtle bg-surface p-8 text-center text-xs text-ink-muted">
+                    No invoices generated yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {invoices.map((inv) => (
+                      <div
+                        key={inv.id}
+                        className="rounded-xl border border-border-subtle bg-surface p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs font-bold text-[#FF5B00]">{inv.invoice_number}</code>
+                            <span className="rounded bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                              {inv.status}
+                            </span>
+                            {inv.is_standalone && (
+                              <span className="rounded bg-surface-elevated px-2 py-0.5 text-[10px] font-semibold text-ink-secondary">
+                                Standalone
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-xs font-semibold text-white">{inv.company_name}</h4>
+                          <p className="text-[11px] text-ink-muted">
+                            {inv.contract_title} • {inv.service_description || "Creator Services"}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[10px] text-ink-muted block">Total (with GST)</span>
+                            <span className="text-sm font-bold tabular-nums text-white">
+                              ₹{Number(inv.total_inr).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setViewInvoice(inv)}
+                            className="rounded-lg border border-border-subtle bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                          >
+                            View Invoice
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sub-section 4: My Earnings */}
+            {profileSubTab === "earnings" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
+                    <span className="text-xs text-ink-muted">Total Lifetime Earnings</span>
+                    <div className="text-2xl font-bold tabular-nums text-emerald-400">
+                      ₹{Number(stats.total_earnings_inr || 0).toLocaleString("en-IN")}
+                    </div>
+                    <span className="text-[11px] text-ink-secondary">Settled directly or via escrow</span>
+                  </div>
+
+                  <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
+                    <span className="text-xs text-ink-muted">Currently in Escrow</span>
+                    <div className="text-2xl font-bold tabular-nums text-[#FF5B00]">
+                      ₹{Number(stats.locked_escrow_inr || 0).toLocaleString("en-IN")}
+                    </div>
+                    <span className="text-[11px] text-ink-secondary">Nodal bank escrow balance</span>
+                  </div>
+
+                  <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-1">
+                    <span className="text-xs text-ink-muted">Active Pipeline Deals</span>
+                    <div className="text-2xl font-bold tabular-nums text-white">
+                      {stats.active_deals || 0}
+                    </div>
+                    <span className="text-[11px] text-ink-secondary">In production or client review</span>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border-strong bg-surface p-6 space-y-3">
+                  <h4 className="text-sm font-bold text-white">Escrow &amp; Payout Coordinates</h4>
+                  <p className="text-xs text-ink-secondary leading-relaxed">
+                    All escrow payments released by agencies are disbursed directly into your registered bank account or UPI handle. You can update your payment coordinates in the Edit Profile tab.
+                  </p>
+                  <div className="pt-2 flex items-center gap-3">
+                    <button
+                      onClick={() => setProfileSubTab("profile")}
+                      className="rounded-lg bg-[#FF5B00] px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors"
+                    >
+                      Update Payout Info
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("payments")}
+                      className="rounded-lg border border-border-subtle bg-surface-elevated px-4 py-2 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                    >
+                      View Payouts Ledger
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* ======================================================== */}
@@ -1311,6 +2121,703 @@ export default function CreatorDashboard() {
                 className="rounded-lg bg-surface-elevated border border-border-subtle px-4 py-2 text-xs font-semibold text-white hover:border-[#FF5B00]"
               >
                 Close Invoice
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ======================================================== */}
+      {/* CREATE CONTRACT MODAL */}
+      {/* ======================================================== */}
+      {createContractModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+              <div>
+                <span className="text-xs font-semibold text-[#FF5B00] uppercase">New Campaign Proposal</span>
+                <h3 className="text-xl font-bold text-white mt-0.5">Create Collaboration Contract</h3>
+                <p className="text-xs text-ink-secondary mt-1">
+                  Draft a legally enforceable contract sealed with SHA-256. Clients can review and sign without logging in.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateContractModalOpen(false)}
+                className="text-ink-muted hover:text-white p-1"
+                aria-label="Close dialog"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateContract} className="space-y-5">
+              {/* Client Type Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-primary">Recipient / Client Type</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setContractClientType("EXTERNAL")}
+                    className={`rounded-xl border p-3 text-left transition-colors ${
+                      contractClientType === "EXTERNAL"
+                        ? "border-[#FF5B00] bg-[#FF5B00]/10"
+                        : "border-border-subtle bg-surface-elevated hover:border-border-strong"
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-white block">External Agency / Brand</span>
+                    <span className="text-[11px] text-ink-secondary">Guest sign via link (no login needed)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setContractClientType("REGISTERED")}
+                    className={`rounded-xl border p-3 text-left transition-colors ${
+                      contractClientType === "REGISTERED"
+                        ? "border-[#FF5B00] bg-[#FF5B00]/10"
+                        : "border-border-subtle bg-surface-elevated hover:border-border-strong"
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-white block">Registered CreateKar Agency</span>
+                    <span className="text-[11px] text-ink-secondary">Pick from verified brand directory</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Registered Agency Picker */}
+              {contractClientType === "REGISTERED" ? (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-ink-primary">Select Agency</label>
+                  <select
+                    value={contractAgencyId}
+                    onChange={(e) => {
+                      setContractAgencyId(e.target.value);
+                      const agency = registeredAgencies.find((a) => a.id === e.target.value);
+                      if (agency) {
+                        setContractClientCompany(agency.company_name || agency.brand_name || agency.name);
+                        setContractClientName(agency.name);
+                        setContractClientEmail(agency.email);
+                      }
+                    }}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  >
+                    <option value="">-- Choose an agency --</option>
+                    {registeredAgencies.map((agency) => (
+                      <option key={agency.id} value={agency.id}>
+                        {agency.company_name || agency.brand_name || agency.name} ({agency.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                /* External Client Info */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Client Company / Brand Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Nykaa, BoAt, Agency Delta"
+                      value={contractClientCompany}
+                      onChange={(e) => setContractClientCompany(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Client Contact Person Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Priya Sharma"
+                      value={contractClientName}
+                      onChange={(e) => setContractClientName(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Client Email (For Link &amp; Records)</label>
+                    <input
+                      type="email"
+                      placeholder="contact@brand.com"
+                      value={contractClientEmail}
+                      onChange={(e) => setContractClientEmail(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Client WhatsApp / Phone</label>
+                    <input
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={contractClientPhone}
+                      onChange={(e) => setContractClientPhone(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Campaign Commercials */}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Campaign Title *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Festive Launch: 1x Instagram Reel + 2x Stories"
+                    value={contractTitle}
+                    onChange={(e) => setContractTitle(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Campaign Scope &amp; Brief *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Describe deliverable expectations, product review terms, exclusivity, and timeline..."
+                    value={contractBrief}
+                    onChange={(e) => setContractBrief(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Gross Deal Value (INR) *</label>
+                    <input
+                      type="number"
+                      required
+                      min={1000}
+                      value={contractGross}
+                      onChange={(e) => setContractGross(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Advance Escrow (%)</label>
+                    <select
+                      value={contractAdvancePercent}
+                      onChange={(e) => setContractAdvancePercent(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    >
+                      <option value="25">25% Advance</option>
+                      <option value="50">50% Advance (Standard)</option>
+                      <option value="75">75% Advance</option>
+                      <option value="100">100% Upfront Escrow</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Payment Mode</label>
+                    <select
+                      value={contractPaymentMode}
+                      onChange={(e) => setContractPaymentMode(e.target.value as any)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    >
+                      <option value="ESCROW_RAZORPAY">Razorpay Nodal Escrow</option>
+                      <option value="DIRECT_P2P">Direct UPI / P2P Settlement</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deliverables List */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white">Campaign Deliverables</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setContractDeliverables([
+                        ...contractDeliverables,
+                        { type: "Instagram Story", description: "2x Story frames with swipe-up link", deadline: "" }
+                      ])
+                    }
+                    className="text-xs font-semibold text-[#FF5B00] hover:underline inline-flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span>Add Deliverable</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {contractDeliverables.map((deliv, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-elevated p-2.5 text-xs"
+                    >
+                      <input
+                        type="text"
+                        placeholder="Format (e.g. YouTube Video)"
+                        value={deliv.type}
+                        onChange={(e) => {
+                          const updated = [...contractDeliverables];
+                          updated[index].type = e.target.value;
+                          setContractDeliverables(updated);
+                        }}
+                        className="w-1/3 rounded border border-border-subtle bg-surface px-2.5 py-1 text-white focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Description of content"
+                        value={deliv.description}
+                        onChange={(e) => {
+                          const updated = [...contractDeliverables];
+                          updated[index].description = e.target.value;
+                          setContractDeliverables(updated);
+                        }}
+                        className="w-2/3 rounded border border-border-subtle bg-surface px-2.5 py-1 text-white focus:outline-none"
+                      />
+                      {contractDeliverables.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setContractDeliverables(contractDeliverables.filter((_, i) => i !== index));
+                          }}
+                          className="text-ink-muted hover:text-rose-400 p-1"
+                          aria-label="Remove deliverable"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div data-ui="divider" className="flex items-center justify-end gap-3 pt-3 border-t border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => setCreateContractModalOpen(false)}
+                  className="rounded-lg border border-border-subtle bg-surface-elevated px-4 py-2 text-xs font-semibold text-white hover:border-border-strong"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingContract}
+                  className="rounded-lg bg-[#FF5B00] px-5 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors disabled:opacity-50"
+                >
+                  {creatingContract ? "Sealing Agreement..." : "Create Campaign Contract"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* CONTRACT SHARE & GUEST SIGNING MODAL */}
+      {/* ======================================================== */}
+      {contractShareModalOpen && createdContractData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
+          <div className="w-full max-w-xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+              <div>
+                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Contract Agreement Ready to Share</span>
+                </span>
+                <h3 className="text-xl font-bold text-white mt-1">
+                  {createdContractData.contractNumber}
+                </h3>
+                <p className="text-xs text-ink-secondary mt-1">
+                  Client: {createdContractData.clientCompany} • Deal Value: ₹{Number(createdContractData.grossAmount).toLocaleString("en-IN")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setContractShareModalOpen(false)}
+                className="text-ink-muted hover:text-white p-1"
+                aria-label="Close dialog"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Explanation Banner */}
+            <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-4 space-y-1 text-xs text-blue-200">
+              <span className="font-semibold text-white block">Instant Guest Signing Active</span>
+              <p>
+                Your client can review and sign this agreement directly via the link below without creating a CreateKar account or logging in. Sealed under the IT Act 2000 (Section 10A).
+              </p>
+            </div>
+
+            {/* Signing URL Copy Bar */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-ink-primary">Public Signing Link</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={createdContractData.publicSigningUrl}
+                  className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-ink-secondary focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdContractData.publicSigningUrl);
+                    toast.success("Signing link copied to clipboard!");
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FF5B00] px-4 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] shrink-0 transition-colors"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Direct 1-Click Share Actions */}
+            <div className="space-y-2 pt-2">
+              <span className="text-xs font-medium text-ink-primary block">Quick Share via Channels</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a
+                  href={getContractWhatsAppShareUrl(
+                    createdContractData.publicSigningUrl,
+                    createdContractData.clientName || createdContractData.clientCompany,
+                    createdContractData.title || "Campaign",
+                    createdContractData.grossAmount
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span>Share on WhatsApp</span>
+                </a>
+
+                <a
+                  href={`mailto:${createdContractData.clientEmail}?subject=${encodeURIComponent(
+                    `CreateKar Agreement: ${createdContractData.title || "Creator Collaboration"}`
+                  )}&body=${encodeURIComponent(
+                    `Hi ${createdContractData.clientName || "Partner"},\n\nPlease review and sign our campaign contract on CreateKar: ${createdContractData.publicSigningUrl}\n\nTerms are sealed with SHA-256 and no login is required.\n\nThank you!`
+                  )}`}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border-subtle bg-surface-elevated px-4 py-2.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span>Send via Email</span>
+                </a>
+              </div>
+            </div>
+
+            <div data-ui="divider" className="flex items-center justify-end pt-3 border-t border-border-subtle">
+              <button
+                type="button"
+                onClick={() => setContractShareModalOpen(false)}
+                className="rounded-lg bg-surface-elevated border border-border-subtle px-5 py-2 text-xs font-semibold text-white hover:border-border-strong"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* CREATE INVOICE MODAL (Contract-Linked vs Standalone) */}
+      {/* ======================================================== */}
+      {createInvoiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
+          <div className="w-full max-w-2xl rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+              <div>
+                <span className="text-xs font-semibold text-[#FF5B00] uppercase">Tax Invoice Generator</span>
+                <h3 className="text-xl font-bold text-white mt-0.5">Generate GST Tax Invoice</h3>
+                <p className="text-xs text-ink-secondary mt-1">
+                  Issue compliant B2B invoices with SAC code 998311 and automated 18% GST (CGST + SGST).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateInvoiceModalOpen(false)}
+                className="text-ink-muted hover:text-white p-1"
+                aria-label="Close dialog"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateInvoice} className="space-y-5">
+              {/* Source Mode Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-ink-primary">Invoice Foundation</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInvoiceSource("CONTRACT")}
+                    className={`rounded-xl border p-3 text-left transition-colors ${
+                      invoiceSource === "CONTRACT"
+                        ? "border-[#FF5B00] bg-[#FF5B00]/10"
+                        : "border-border-subtle bg-surface-elevated hover:border-border-strong"
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-white block">From Existing Contract (Recommended)</span>
+                    <span className="text-[11px] text-ink-secondary">Pre-fills terms &amp; locks agreed rate</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setInvoiceSource("STANDALONE")}
+                    className={`rounded-xl border p-3 text-left transition-colors ${
+                      invoiceSource === "STANDALONE"
+                        ? "border-[#FF5B00] bg-[#FF5B00]/10"
+                        : "border-border-subtle bg-surface-elevated hover:border-border-strong"
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-white block">Standalone Freelance Invoice</span>
+                    <span className="text-[11px] text-ink-secondary">Direct billing without contract</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Standalone Anti-Slop Upsell Banner */}
+              {invoiceSource === "STANDALONE" && (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-1 text-xs text-amber-200" data-ui="callout">
+                  <div className="flex items-center gap-1.5 font-semibold text-white">
+                    <Sparkles className="h-4 w-4 text-[#FF5B00]" />
+                    <span>CreateKar Pro-Tip: Contract-Backed Billing</span>
+                  </div>
+                  <p>
+                    CreateKar can make the finest invoices based on contracts! Linking invoices to contracts gives you advance escrow deposits, milestone tracking, and automated CBDT TDS accounting. Try the contracts feature next time if you like!
+                  </p>
+                </div>
+              )}
+
+              {/* Contract Selector if CONTRACT mode */}
+              {invoiceSource === "CONTRACT" && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-ink-primary">Select Active Campaign Contract *</label>
+                  <select
+                    required
+                    value={invoiceContractId}
+                    onChange={(e) => handleSelectContractForInvoice(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  >
+                    <option value="">-- Choose a contract to invoice --</option>
+                    {contracts.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.contract_number} • {c.title} (₹{Number(c.gross_amount_inr).toLocaleString("en-IN")}) - {c.company_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Client & Billing Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Billed To (Company / Client Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Acme Marketing Pvt Ltd"
+                    value={invoiceClientCompany}
+                    onChange={(e) => setInvoiceClientCompany(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Client Contact Representative</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Ananya Sen"
+                    value={invoiceClientName}
+                    onChange={(e) => setInvoiceClientName(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Client Email (For Delivery)</label>
+                  <input
+                    type="email"
+                    placeholder="finance@client.com"
+                    value={invoiceClientEmail}
+                    onChange={(e) => setInvoiceClientEmail(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Client GSTIN (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="27AABCB1234F1Z1"
+                    value={invoiceClientGstin}
+                    onChange={(e) => setInvoiceClientGstin(e.target.value.toUpperCase())}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-ink-primary">Client Billing Address</label>
+                <textarea
+                  rows={2}
+                  placeholder="Official office address printed on the invoice..."
+                  value={invoiceClientAddress}
+                  onChange={(e) => setInvoiceClientAddress(e.target.value)}
+                  className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                />
+              </div>
+
+              {/* Service Details & Commercials */}
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Description of Service</label>
+                  <input
+                    type="text"
+                    value={invoiceServiceDesc}
+                    onChange={(e) => setInvoiceServiceDesc(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">Taxable Value (INR) *</label>
+                    <input
+                      type="number"
+                      required
+                      min={500}
+                      value={invoiceTaxableValue}
+                      onChange={(e) => setInvoiceTaxableValue(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">SAC Code</label>
+                    <input
+                      type="text"
+                      value={invoiceSacCode}
+                      onChange={(e) => setInvoiceSacCode(e.target.value)}
+                      className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#FF5B00] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-primary">GST (18% Total)</label>
+                    <div className="rounded-lg border border-border-subtle bg-surface-elevated/60 px-3 py-2 text-xs text-ink-secondary">
+                      ₹{Math.round((Number(invoiceTaxableValue) || 0) * 0.18).toLocaleString("en-IN")} (9% + 9%)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Preview */}
+                <div className="rounded-xl border border-border-strong bg-surface-elevated p-4 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white">Grand Total with 18% GST:</span>
+                  <span className="text-base font-bold tabular-nums text-[#FF5B00]">
+                    ₹{Math.round((Number(invoiceTaxableValue) || 0) * 1.18).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+
+              <div data-ui="divider" className="flex items-center justify-end gap-3 pt-3 border-t border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => setCreateInvoiceModalOpen(false)}
+                  className="rounded-lg border border-border-subtle bg-surface-elevated px-4 py-2 text-xs font-semibold text-white hover:border-border-strong"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingInvoice}
+                  className="rounded-lg bg-[#FF5B00] px-5 py-2 text-xs font-semibold text-white hover:bg-[#ff6c1a] transition-colors disabled:opacity-50"
+                >
+                  {creatingInvoice ? "Generating Tax Invoice..." : "Generate Tax Invoice"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* INVOICE SHARE & UPSELL MODAL */}
+      {/* ======================================================== */}
+      {invoiceShareModalOpen && createdInvoiceData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" data-ui="modal">
+          <div className="w-full max-w-lg rounded-2xl border border-border-strong bg-surface p-6 sm:p-8 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div data-ui="divider" className="flex items-start justify-between border-b border-border-subtle pb-4">
+              <div>
+                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Invoice Successfully Generated</span>
+                </span>
+                <h3 className="text-xl font-bold text-white mt-1">
+                  {createdInvoiceData.invoiceNumber}
+                </h3>
+                <p className="text-xs text-ink-secondary mt-1">
+                  Total Payable: ₹{Number(createdInvoiceData.totalInr).toLocaleString("en-IN")} (incl. 18% GST)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInvoiceShareModalOpen(false)}
+                className="text-ink-muted hover:text-white p-1"
+                aria-label="Close dialog"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* If Standalone: Prompt Contract feature */}
+            {createdInvoiceData.isStandalone && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2 text-xs text-amber-200" data-ui="callout">
+                <div className="flex items-center gap-1.5 font-semibold text-white">
+                  <Sparkles className="h-4 w-4 text-[#FF5B00]" />
+                  <span>Contract Feature Recommendation</span>
+                </div>
+                <p>
+                  CreateKar can make the finest invoices based on contracts, try the contracts feature next time if you like! Contracts secure your advance escrow and handle compliance automatically.
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvoiceShareModalOpen(false);
+                      setCreateContractModalOpen(true);
+                    }}
+                    className="rounded-lg bg-surface border border-border-subtle px-3 py-1.5 text-xs font-semibold text-white hover:border-[#FF5B00] transition-colors"
+                  >
+                    Try Contracts Feature Now
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Direct 1-Click WhatsApp Share */}
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-medium text-ink-primary block">Share with Client</span>
+              <a
+                href={getInvoiceWhatsAppShareUrl(
+                  createdInvoiceData.invoiceNumber,
+                  invoiceClientCompany || "Partner",
+                  createdInvoiceData.totalInr
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-colors w-full"
+              >
+                <Share2 className="h-4 w-4" />
+                <span>Send Invoice Reminder on WhatsApp</span>
+              </a>
+            </div>
+
+            <div data-ui="divider" className="flex items-center justify-end gap-3 pt-3 border-t border-border-subtle">
+              <button
+                type="button"
+                onClick={() => setInvoiceShareModalOpen(false)}
+                className="rounded-lg bg-surface-elevated border border-border-subtle px-5 py-2 text-xs font-semibold text-white hover:border-border-strong"
+              >
+                Close
               </button>
             </div>
           </div>

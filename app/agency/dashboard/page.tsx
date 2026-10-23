@@ -1103,20 +1103,204 @@ export default function AgencyDashboardPage() {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 6: SETTINGS & AGENCY MONETIZATION */}
+        {/* TAB 6: COMPANY PROFILE */}
+        {/* ======================================================== */}
+        {activeTab === "profile" && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-lg font-bold text-white">Company &amp; Statutory Profile</h2>
+              <p className="text-xs text-ink-secondary mt-1">
+                Manage your registered corporate entity, brand name, statutory GSTIN/TAN, authorized contact representative, and billing address.
+              </p>
+            </div>
+
+            {/* Entity Details Form */}
+            <form onSubmit={handleSaveSettings} className="rounded-xl border border-border-strong bg-surface p-6 space-y-6">
+              <div data-ui="divider" className="flex items-center gap-2 text-white font-semibold text-sm border-b border-border-subtle pb-3">
+                <Building2 className="h-4 w-4 text-[#1D62EA]" />
+                <span>Statutory &amp; Invoicing Entity Information</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Legal Registered Company Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={settingsCompanyName}
+                    onChange={(e) => setSettingsCompanyName(e.target.value)}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Consumer Brand / Trade Name</label>
+                  <input
+                    type="text"
+                    value={settingsBrandName}
+                    onChange={(e) => setSettingsBrandName(e.target.value)}
+                    placeholder="e.g. Zomato, Sugar Cosmetics"
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">GSTIN (15-digit Goods &amp; Services Tax ID)</label>
+                  <input
+                    type="text"
+                    value={settingsGstin}
+                    onChange={(e) => setSettingsGstin(e.target.value.toUpperCase())}
+                    placeholder="e.g. 29AABCN5678F1Z1"
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">TAN (10-digit Tax Deduction Account Number)</label>
+                  <input
+                    type="text"
+                    value={settingsTan}
+                    onChange={(e) => setSettingsTan(e.target.value.toUpperCase())}
+                    placeholder="e.g. BLRN12345D"
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Authorized Account Name</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={agencyProfile.name || "Authorized Representative"}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated/50 px-3 py-2 text-xs text-ink-muted cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-primary">Official Registered Email</label>
+                  <input
+                    type="email"
+                    disabled
+                    value={agencyProfile.email || ""}
+                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated/50 px-3 py-2 text-xs text-ink-muted cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-ink-primary">Registered Billing Address (Printed on Invoices)</label>
+                <textarea
+                  rows={2}
+                  value={settingsBillingAddress}
+                  onChange={(e) => setSettingsBillingAddress(e.target.value)}
+                  placeholder="Complete office address as printed on GST certificate..."
+                  className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-ink-muted">
+                  Current Tier: <span className="text-white font-semibold uppercase">{agencyProfile.plan_tier || "basic"}</span>
+                </span>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-[#1D62EA] px-5 py-2 text-xs font-semibold text-white hover:bg-blue-600 transition-colors"
+                >
+                  Save Company Profile
+                </button>
+              </div>
+            </form>
+
+            {/* Quick Hub Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white">Active Deals</span>
+                  <FileCheck2 className="h-4 w-4 text-[#1D62EA]" />
+                </div>
+                <p className="text-xs text-ink-secondary">Manage campaign contracts and deliverables.</p>
+                <button
+                  onClick={() => setActiveTab("deals")}
+                  className="text-xs font-semibold text-[#1D62EA] hover:underline pt-1 inline-flex items-center gap-1"
+                >
+                  <span>Go to Deals</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white">Tax Invoices</span>
+                  <Receipt className="h-4 w-4 text-[#1D62EA]" />
+                </div>
+                <p className="text-xs text-ink-secondary">Download GST tax invoices with SAC code 998311.</p>
+                <button
+                  onClick={() => setActiveTab("invoices")}
+                  className="text-xs font-semibold text-[#1D62EA] hover:underline pt-1 inline-flex items-center gap-1"
+                >
+                  <span>View Invoices</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-border-subtle bg-surface p-5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-white">Subscription Plans</span>
+                  <Settings className="h-4 w-4 text-[#1D62EA]" />
+                </div>
+                <p className="text-xs text-ink-secondary">Upgrade creator discovery quota and Aadhaar e-sign.</p>
+                <button
+                  onClick={() => setActiveTab("settings")}
+                  className="text-xs font-semibold text-[#1D62EA] hover:underline pt-1 inline-flex items-center gap-1"
+                >
+                  <span>Manage Plans</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 7: SETTINGS & AGENCY MONETIZATION */}
         {/* ======================================================== */}
         {activeTab === "settings" && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-bold text-white">Agency Profile &amp; Membership Plan</h2>
+              <h2 className="text-lg font-bold text-white">Agency Membership Plans &amp; Search Quotas</h2>
               <p className="text-xs text-ink-secondary mt-1">
-                Configure legal billing information, GSTIN, TAN for TDS filing, and manage your creator search capacity.
+                Manage your agency tier, creator discovery capacity, and platform privileges.
               </p>
+            </div>
+
+            {/* Current Quota Status Banner */}
+            <div className="rounded-xl border border-border-strong bg-surface p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-xs text-ink-muted">Explore Directory Capacity</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold text-white">
+                    {creatorMeta.totalMatching || creators.length} Creators Available
+                  </span>
+                  <span className="rounded bg-[#1D62EA]/10 border border-[#1D62EA]/30 px-2.5 py-0.5 text-xs font-semibold text-[#1D62EA]">
+                    {settingsPlanTier.toUpperCase()} TIER
+                  </span>
+                </div>
+                <p className="text-xs text-ink-secondary">
+                  To view and partner with more creators across India, upgrade your agency subscription below.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setActiveTab("profile")}
+                className="rounded-lg border border-border-subtle bg-surface-elevated px-4 py-2 text-xs font-semibold text-white hover:border-[#1D62EA] transition-colors"
+              >
+                Edit Company Profile
+              </button>
             </div>
 
             {/* Plan Tier Selection Cards */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-white">Select Agency Subscription Plan</h3>
+              <h3 className="text-sm font-bold text-white">Available Agency Membership Tiers</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {/* Basic Agency */}
                 <div
@@ -1234,78 +1418,24 @@ export default function AgencyDashboardPage() {
               </div>
             </div>
 
-            {/* Legal Entity Details Form */}
-            <form onSubmit={handleSaveSettings} className="rounded-xl border border-border-strong bg-surface p-6 space-y-5">
-              <div data-ui="divider" className="flex items-center gap-2 text-white font-semibold text-sm border-b border-border-subtle pb-3">
-                <Building2 className="h-4 w-4 text-[#1D62EA]" />
-                <span>Statutory &amp; Invoicing Entity Details</span>
+            {/* Tier Confirmation Action */}
+            <div className="rounded-xl border border-border-strong bg-surface p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs text-ink-muted block">Selected Tier</span>
+                <span className="text-base font-bold text-white capitalize">{settingsPlanTier} Plan</span>
+                <p className="text-xs text-ink-secondary mt-0.5">
+                  Plan change applies immediately to your explore search limits and contract privileges.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-ink-primary">Legal Registered Company Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={settingsCompanyName}
-                    onChange={(e) => setSettingsCompanyName(e.target.value)}
-                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-ink-primary">Brand / DBA Name</label>
-                  <input
-                    type="text"
-                    value={settingsBrandName}
-                    onChange={(e) => setSettingsBrandName(e.target.value)}
-                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-ink-primary">GSTIN (Goods and Services Tax ID)</label>
-                  <input
-                    type="text"
-                    value={settingsGstin}
-                    onChange={(e) => setSettingsGstin(e.target.value.toUpperCase())}
-                    placeholder="e.g. 29AABCN5678F1Z1"
-                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-ink-primary">TAN (Tax Deduction Account Number)</label>
-                  <input
-                    type="text"
-                    value={settingsTan}
-                    onChange={(e) => setSettingsTan(e.target.value.toUpperCase())}
-                    placeholder="e.g. BLRN12345D"
-                    className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-ink-primary">Registered Billing Address</label>
-                <textarea
-                  rows={2}
-                  value={settingsBillingAddress}
-                  onChange={(e) => setSettingsBillingAddress(e.target.value)}
-                  placeholder="Complete office address as printed on GST registration..."
-                  className="w-full rounded-lg border border-border-subtle bg-surface-elevated px-3 py-2 text-xs text-white focus:border-[#1D62EA] focus:outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end pt-2">
-                <button
-                  type="submit"
-                  className="rounded-lg bg-[#1D62EA] px-5 py-2 text-xs font-semibold text-white hover:bg-blue-600 transition-colors"
-                >
-                  Save Settings &amp; Plan
-                </button>
-              </div>
-            </form>
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                className="rounded-lg bg-[#1D62EA] px-6 py-2.5 text-xs font-semibold text-white hover:bg-blue-600 transition-colors shrink-0"
+              >
+                Confirm Plan Selection
+              </button>
+            </div>
           </div>
         )}
       </main>

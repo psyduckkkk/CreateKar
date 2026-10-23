@@ -52,7 +52,8 @@ export function AgencyNav({
     { id: "deals", label: "Deals & Contracts", icon: FileCheck2 },
     { id: "reviews", label: "Deliverable Reviews", icon: Video },
     { id: "invoices", label: "GST Invoices", icon: Receipt },
-    { id: "settings", label: "Agency Settings", icon: Settings }
+    { id: "profile", label: "Company Profile", icon: Building2 },
+    { id: "settings", label: "Agency Plans", icon: Settings }
   ];
 
   return (

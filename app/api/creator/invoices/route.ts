@@ -18,12 +18,16 @@ export async function GET() {
     const isWatermarkFree = planTier === "influencer";
 
     const invoices = await query(
-      `SELECT i.*, c.title as contract_title, c.contract_number,
-              u.name as agency_name, a.company_name, a.gstin as agency_gstin
+      `SELECT i.*,
+              COALESCE(c.title, 'Direct Creator Invoice') as contract_title,
+              COALESCE(c.contract_number, 'STANDALONE') as contract_number,
+              COALESCE(i.client_name, u.name, 'Client Representative') as agency_name,
+              COALESCE(i.client_company, a.company_name, i.client_name, 'Client Organization') as company_name,
+              COALESCE(i.client_gstin, a.gstin, '') as agency_gstin
        FROM invoices i
-       JOIN contracts c ON i.contract_id = c.id
-       JOIN users u ON i.agency_id = u.id
-       JOIN agency_profiles a ON i.agency_id = a.user_id
+       LEFT JOIN contracts c ON i.contract_id = c.id
+       LEFT JOIN users u ON i.agency_id = u.id
+       LEFT JOIN agency_profiles a ON i.agency_id = a.user_id
        WHERE i.creator_id = $1
        ORDER BY i.issued_at DESC`,
       [session.userId]

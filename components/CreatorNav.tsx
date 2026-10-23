@@ -7,8 +7,8 @@ import { Award, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreatorNavProps {
-  activeTab: "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan";
-  setActiveTab: (tab: "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan") => void;
+  activeTab: "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan" | "profile";
+  setActiveTab: (tab: "overview" | "contracts" | "deliveries" | "invoices" | "payments" | "plan" | "profile") => void;
   creatorName: string;
   badgeType: "none" | "verified" | "famous";
   planTier: "basic" | "pro" | "influencer";
@@ -101,6 +101,16 @@ export function CreatorNav({
               }`}
             >
               Plan &amp; Boost
+            </button>
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`rounded-lg px-3 py-1.5 transition-colors ${
+                activeTab === "profile"
+                  ? "bg-surface-elevated text-white font-semibold"
+                  : "text-ink-secondary hover:text-white"
+              }`}
+            >
+              My Profile
             </button>
           </nav>
         </div>
