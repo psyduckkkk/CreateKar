@@ -15,7 +15,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2 text-xs text-ink-muted">
               <ShieldCheck className="h-4 w-4 text-[#FF5B00]" />
-              <span>100% Escrow Protection • RBI Compliant Banking</span>
+              <span>100% Payment Protection • RBI Safe Bank Hold</span>
             </div>
           </div>
 
@@ -42,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="#safety" className="hover:text-ink-primary transition-colors">
-                  Escrow Payment Safety
+                  Payment Safety &amp; Protection
                 </Link>
               </li>
             </ul>
