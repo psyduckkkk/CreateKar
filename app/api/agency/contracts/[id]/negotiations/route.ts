@@ -77,6 +77,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const contract = contractRes.rows[0];
 
+    // Sanitize and validate counter values
+    let validatedGross: number | null = null;
+    let validatedAdvance: number | null = null;
+    if (proposed_gross_amount_inr !== undefined && proposed_gross_amount_inr !== null && proposed_gross_amount_inr !== "") {
+      const g = Number(proposed_gross_amount_inr);
+      if (!Number.isFinite(g) || g < 1000 || g > 50000000) {
+        return NextResponse.json({ error: "Counter gross amount must be between ₹1,000 and ₹5,00,00,000." }, { status: 400 });
+      }
+      validatedGross = Math.round(g);
+    }
+    if (proposed_advance_percent !== undefined && proposed_advance_percent !== null && proposed_advance_percent !== "") {
+      const a = Number(proposed_advance_percent);
+      if (!Number.isFinite(a) || a < 0 || a > 100) {
+        return NextResponse.json({ error: "Counter advance percent must be between 0% and 100%." }, { status: 400 });
+      }
+      validatedAdvance = Math.round(a);
+    }
+
     // Record negotiation entry
     await query(
       `INSERT INTO contract_negotiations (
@@ -88,9 +106,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         session.userId,
         session.name,
         session.role,
-        message || "Terms accepted.",
-        proposed_gross_amount_inr || null,
-        proposed_advance_percent || null
+        message || (action === "ACCEPT_COUNTER" ? "Counter-offer accepted." : "Terms update."),
+        validatedGross,
+        validatedAdvance
       ]
     );
 
@@ -102,10 +120,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    // If accepted revised terms, update contract gross, advance, balance, TDS & re-seal with SHA-256
-    if (action === "ACCEPT_COUNTER" && proposed_gross_amount_inr) {
-      const gross = Number(proposed_gross_amount_inr);
-      const advPercent = proposed_advance_percent ? Number(proposed_advance_percent) : contract.advance_percent;
+    // SEC-01 FIX: If accepted revised terms, verify the counter-offer was legitimately made by the counterparty
+    if (action === "ACCEPT_COUNTER") {
+      const latestCounterRes = await query(
+        `SELECT proposed_gross_amount_inr, proposed_advance_percent, sender_id
+         FROM contract_negotiations
+         WHERE contract_id = $1 AND sender_id != $2 AND proposed_gross_amount_inr IS NOT NULL
+         ORDER BY created_at DESC LIMIT 1`,
+        [id, session.userId]
+      );
+
+      if (latestCounterRes.rows.length === 0) {
+        return NextResponse.json(
+          { error: "No pending counter-offer from the counterparty exists to accept." },
+          { status: 400 }
+        );
+      }
+
+      const counter = latestCounterRes.rows[0];
+      const gross = Number(counter.proposed_gross_amount_inr);
+      const advPercent = counter.proposed_advance_percent !== null ? Number(counter.proposed_advance_percent) : contract.advance_percent;
+
+      if (!Number.isFinite(gross) || gross < 1000) {
+        return NextResponse.json({ error: "Invalid counter-offer terms recorded." }, { status: 400 });
+      }
+
       const advanceAmount = Math.round((gross * advPercent) / 100);
       const balanceAmount = gross - advanceAmount;
 

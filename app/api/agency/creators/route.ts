@@ -25,9 +25,9 @@ export async function GET(request: Request) {
     if (agencyTier === "pro") limit = 10;
     if (agencyTier === "enterprise") limit = 50;
 
-    // 2. Fetch creators with active boost prioritizing top slots
+    // 2. Fetch creators with active boost prioritizing top slots (Omit private email to prevent scraping)
     let sql = `
-      SELECT u.id, u.name, u.email,
+      SELECT u.id, u.name,
              cp.niche, cp.bio, cp.instagram_handle, cp.youtube_handle,
              cp.followers_count, cp.base_rate_inr, cp.plan_tier, cp.badge_type,
              cp.boost_active_until,

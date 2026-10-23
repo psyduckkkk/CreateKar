@@ -2,6 +2,10 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
+  throw new Error("SECURITY ALERT: AUTH_SECRET environment variable is missing in production.");
+}
+
 const JWT_SECRET_STRING = process.env.AUTH_SECRET || "createkar_fallback_secret_key_minimum_32_chars_xyz";
 const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
 export const COOKIE_NAME = "ck_session";

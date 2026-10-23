@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_SECRET) {
+  throw new Error("SECURITY ALERT: AUTH_SECRET environment variable is missing in production.");
+}
+
 const JWT_SECRET_STRING = process.env.AUTH_SECRET || "createkar_fallback_secret_key_minimum_32_chars_xyz";
 const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
 const COOKIE_NAME = "ck_session";
@@ -35,7 +39,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Protected Route Gates
+  // 2. Protected API Route Gates (Defense-in-depth JSON rejection)
+  const isCreatorApi = pathname.startsWith("/api/creator");
+  const isAgencyApi = pathname.startsWith("/api/agency");
+  const isAdminApi = pathname.startsWith("/api/admin");
+
+  if (isCreatorApi || isAgencyApi || isAdminApi) {
+    if (!session) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+    if (isAgencyApi && session.role !== "AGENCY" && session.role !== "ADMIN" && session.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Forbidden: Agency role required" }, { status: 403 });
+    }
+    if (isCreatorApi && session.role !== "CREATOR" && session.role !== "ADMIN" && session.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Forbidden: Creator role required" }, { status: 403 });
+    }
+    if (isAdminApi && session.role !== "ADMIN" && session.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "Forbidden: Admin role required" }, { status: 403 });
+    }
+  }
+
+  // 3. Protected UI Route Gates
   const isCreatorRoute = pathname.startsWith("/dashboard");
   const isAgencyRoute = pathname.startsWith("/agency");
   const isAdminRoute = pathname.startsWith("/admin");
@@ -72,6 +96,9 @@ export const config = {
     "/dashboard/:path*",
     "/agency/:path*",
     "/admin/:path*",
+    "/api/creator/:path*",
+    "/api/agency/:path*",
+    "/api/admin/:path*",
     "/login",
     "/signup",
   ],

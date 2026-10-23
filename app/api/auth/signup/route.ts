@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { hashPassword, signSessionToken, COOKIE_NAME } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(`signup_${ip}`, 8, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Too many accounts registered from this IP. Please wait ${rateCheck.retryAfterSec} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const {
       email,

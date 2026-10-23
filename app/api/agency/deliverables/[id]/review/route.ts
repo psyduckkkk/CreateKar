@@ -54,6 +54,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
     }
 
+    // SEC-08 FIX: Deliverable can ONLY be approved if it was actually SUBMITTED
+    if (deliverable.status !== "SUBMITTED") {
+      return NextResponse.json(
+        { error: `Cannot approve deliverable in '${deliverable.status}' status. Creator has not submitted a draft yet.` },
+        { status: 400 }
+      );
+    }
+
     // Action === 'APPROVE'
     await query(
       `UPDATE deliverables

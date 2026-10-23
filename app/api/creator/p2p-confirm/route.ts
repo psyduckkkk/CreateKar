@@ -30,18 +30,30 @@ export async function POST(request: Request) {
       [contractId, transactionId]
     );
 
-    // Update contract status to COMPLETED
+    // SEC-03 FIX: Check if all deliverables are approved
+    const unapproved = await query(
+      `SELECT COUNT(*) as count FROM deliverables WHERE contract_id = $1 AND status != 'APPROVED'`,
+      [contractId]
+    );
+    const hasUnapprovedDeliverables = Number(unapproved.rows[0]?.count || 0) > 0;
+
+    // Advance payment transitions to FUNDED/IN_REVIEW; only final settlement transitions to COMPLETED
+    const nextStatus = hasUnapprovedDeliverables ? "FUNDED" : "COMPLETED";
+
     await query(
       `UPDATE contracts
-       SET status = 'COMPLETED',
+       SET status = $1,
            updated_at = NOW()
-       WHERE id = $1`,
-      [contractId]
+       WHERE id = $2`,
+      [nextStatus, contractId]
     );
 
     return NextResponse.json({
       success: true,
-      message: "Direct payment confirmed! Contract marked as completed.",
+      message: hasUnapprovedDeliverables
+        ? "Advance payment confirmed! Contract is now funded. You may proceed with milestone production."
+        : "Final payment confirmed! Contract marked as completed.",
+      nextStatus
     });
   } catch (error) {
     console.error("P2P confirm error:", error);

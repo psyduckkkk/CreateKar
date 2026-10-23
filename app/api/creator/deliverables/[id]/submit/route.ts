@@ -16,9 +16,20 @@ export async function POST(
     const body = await request.json();
     const { submissionUrl, submissionNotes } = body;
 
-    if (!submissionUrl || !submissionUrl.trim().startsWith("http")) {
+    if (!submissionUrl || typeof submissionUrl !== "string") {
+      return NextResponse.json({ error: "A valid submission URL string is required." }, { status: 400 });
+    }
+
+    let sanitizedUrl: string;
+    try {
+      const parsed = new URL(submissionUrl.trim());
+      if (!["https:", "http:"].includes(parsed.protocol)) {
+        throw new Error();
+      }
+      sanitizedUrl = parsed.toString();
+    } catch {
       return NextResponse.json(
-        { error: "Please provide a valid preview link (YouTube, Google Drive, Loom, Instagram draft)." },
+        { error: "Please provide a valid HTTP or HTTPS preview link (YouTube unlisted, Google Drive, Loom, Vimeo)." },
         { status: 400 }
       );
     }
@@ -46,7 +57,7 @@ export async function POST(
            submission_notes = $2,
            updated_at = NOW()
        WHERE id = $3`,
-      [submissionUrl.trim(), submissionNotes || null, deliverableId]
+      [sanitizedUrl, submissionNotes ? String(submissionNotes).slice(0, 2000) : null, deliverableId]
     );
 
     // Update contract status to IN_REVIEW

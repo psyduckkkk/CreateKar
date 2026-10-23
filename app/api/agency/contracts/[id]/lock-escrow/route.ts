@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { createEscrowOrder } from "@/lib/razorpay";
+import { createEscrowOrder, validateP2pTransactionReference } from "@/lib/razorpay";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,6 +27,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const contract = contractRes.rows[0];
+
+    // Status state machine guard
+    if (["FUNDED", "IN_REVIEW", "COMPLETED"].includes(contract.status)) {
+      return NextResponse.json(
+        { error: `Contract is already in '${contract.status}' status. Escrow advance has already been initialized.` },
+        { status: 400 }
+      );
+    }
+
     const advanceInr = Number(contract.advance_amount_inr);
 
     if (contract.payment_mode === "ESCROW_RAZORPAY") {
@@ -72,8 +81,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
     } else {
       // Mode B: Direct P2P UPI/IMPS
-      if (!p2p_utr_number || p2p_utr_number.trim().length < 8) {
-        return NextResponse.json({ error: "Valid 12-digit UPI/IMPS UTR number is required for P2P mode." }, { status: 400 });
+      const utrValidation = validateP2pTransactionReference(p2p_utr_number || "");
+      if (!utrValidation.valid) {
+        return NextResponse.json({ error: utrValidation.message }, { status: 400 });
       }
 
       await query(

@@ -35,30 +35,58 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     const { company_name, brand_name, gstin, tan, billing_address, plan_tier } = body;
+    const isAdmin = session.role === "ADMIN" || session.role === "SUPER_ADMIN";
 
-    let limit = 5;
-    if (plan_tier === "pro") limit = 10;
-    if (plan_tier === "enterprise") limit = 50;
+    // SEC-04 FIX: Regular agency users cannot self-elevate plan tier or search quota without verified payment
+    if (plan_tier && !isAdmin) {
+      const currentTierRes = await query(
+        `SELECT plan_tier FROM agency_profiles WHERE user_id = $1`,
+        [session.userId]
+      );
+      const currentTier = currentTierRes.rows[0]?.plan_tier || "basic";
+      if (plan_tier !== currentTier) {
+        return NextResponse.json(
+          { error: "Plan upgrades require verified subscription payment. Self-elevation is disabled." },
+          { status: 403 }
+        );
+      }
+    }
 
-    await query(
-      `UPDATE agency_profiles
-       SET company_name = COALESCE($1, company_name),
-           brand_name = COALESCE($2, brand_name),
-           gstin = COALESCE($3, gstin),
-           tan = COALESCE($4, tan),
-           billing_address = COALESCE($5, billing_address),
-           plan_tier = COALESCE($6, plan_tier),
-           creator_search_limit = $7,
-           updated_at = NOW()
-       WHERE user_id = $8`,
-      [company_name, brand_name, gstin, tan, billing_address, plan_tier, limit, session.userId]
-    );
+    if (isAdmin && plan_tier) {
+      let limit = 5;
+      if (plan_tier === "pro") limit = 10;
+      if (plan_tier === "enterprise") limit = 50;
+
+      await query(
+        `UPDATE agency_profiles
+         SET company_name = COALESCE($1, company_name),
+             brand_name = COALESCE($2, brand_name),
+             gstin = COALESCE($3, gstin),
+             tan = COALESCE($4, tan),
+             billing_address = COALESCE($5, billing_address),
+             plan_tier = $6,
+             creator_search_limit = $7,
+             updated_at = NOW()
+         WHERE user_id = $8`,
+        [company_name, brand_name, gstin, tan, billing_address, plan_tier, limit, session.userId]
+      );
+    } else {
+      await query(
+        `UPDATE agency_profiles
+         SET company_name = COALESCE($1, company_name),
+             brand_name = COALESCE($2, brand_name),
+             gstin = COALESCE($3, gstin),
+             tan = COALESCE($4, tan),
+             billing_address = COALESCE($5, billing_address),
+             updated_at = NOW()
+         WHERE user_id = $6`,
+        [company_name, brand_name, gstin, tan, billing_address, session.userId]
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Agency profile updated successfully",
-      newPlanTier: plan_tier,
-      newSearchLimit: limit
+      message: "Agency profile updated successfully"
     });
   } catch (err: any) {
     console.error("Update agency profile error:", err);

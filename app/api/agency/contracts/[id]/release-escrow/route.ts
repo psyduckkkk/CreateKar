@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { releaseEscrowTransfer } from "@/lib/razorpay";
+import crypto from "crypto";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,9 +28,43 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const contract = contractRes.rows[0];
 
-    // Check if contract is already completed
-    if (contract.status === "COMPLETED") {
-      return NextResponse.json({ error: "Contract is already completed and funds released." }, { status: 400 });
+    // SEC-02 FIX 1: Verify contract state eligibility
+    if (!["IN_REVIEW", "FUNDED"].includes(contract.status)) {
+      return NextResponse.json(
+        { error: `Escrow cannot be released. Contract is in '${contract.status}' status.` },
+        { status: 400 }
+      );
+    }
+
+    // SEC-02 FIX 2: Mandatory Deliverable Approval Verification
+    const unapprovedDeliverables = await query(
+      `SELECT id, type, status FROM deliverables WHERE contract_id = $1 AND status != 'APPROVED'`,
+      [id]
+    );
+
+    if (unapprovedDeliverables.rows.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Cannot release escrow. ${unapprovedDeliverables.rows.length} deliverable milestone(s) are still awaiting review or revision.`,
+          pendingMilestones: unapprovedDeliverables.rows.map((d: any) => d.type)
+        },
+        { status: 400 }
+      );
+    }
+
+    // SEC-02 FIX 3: Atomic status transition to block concurrent double-spend race condition
+    const updateRes = await query(
+      `UPDATE contracts SET status = 'COMPLETED', updated_at = NOW()
+       WHERE id = $1 AND status IN ('IN_REVIEW', 'FUNDED')
+       RETURNING id`,
+      [id]
+    );
+
+    if (updateRes.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Contract escrow settlement is already in progress or has been completed." },
+        { status: 409 }
+      );
     }
 
     // 1. Release escrow transfer in Razorpay Route
@@ -58,14 +93,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    // 2. Mark contract COMPLETED
-    await query(
-      `UPDATE contracts SET status = 'COMPLETED', updated_at = NOW() WHERE id = $1`,
-      [id]
-    );
-
-    // 3. Generate B2B GST Tax Invoice (4.6)
-    // Check if invoice already exists
+    // 2. Generate B2B GST Tax Invoice (4.6) with high-entropy identifier (SEC-07 FIX)
     const existingInv = await query(`SELECT id FROM invoices WHERE contract_id = $1`, [id]);
     let invoiceNumber = "";
 
@@ -74,7 +102,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const cgst = Math.round(taxable * 0.09);
       const sgst = Math.round(taxable * 0.09);
       const total = taxable + cgst + sgst;
-      invoiceNumber = `INV-CK-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      invoiceNumber = `INV-CK-2026-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
 
       // Watermark rule: Basic creators have watermark; Pro & Influencer creators have watermark_enabled = false
       const watermark = contract.creator_tier === "basic";

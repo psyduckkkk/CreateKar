@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
 import { query } from "@/lib/db";
-import crypto from "crypto";
+import { generateContractSha256Digest } from "@/lib/contracts";
 
 export async function POST(
   request: Request,
@@ -15,7 +15,7 @@ export async function POST(
 
     const { id: contractId } = await params;
 
-    // Verify contract belongs to creator and is in PROPOSED state
+    // Verify contract belongs to creator and is in PROPOSED or NEGOTIATION state
     const contracts = await query(
       "SELECT * FROM contracts WHERE id = $1 AND creator_id = $2",
       [contractId, session.userId]
@@ -27,25 +27,34 @@ export async function POST(
 
     const contract = contracts[0];
 
-    if (contract.status !== "PROPOSED") {
+    if (!["PROPOSED", "NEGOTIATION"].includes(contract.status)) {
       return NextResponse.json(
-        { error: `Contract is in ${contract.status} state and cannot be accepted.` },
+        { error: `Contract is in '${contract.status}' state and cannot be signed.` },
         { status: 400 }
       );
     }
 
-    // Generate SHA-256 digital signature stamp
-    const signatureDigest = crypto
-      .createHash("sha256")
-      .update(`${contract.id}|${contract.creator_id}|${Date.now()}`)
-      .digest("hex");
+    // Deterministic SHA-256 seal under IT Act Section 10A
+    const signatureDigest = generateContractSha256Digest({
+      contractNumber: contract.contract_number,
+      agencyId: contract.agency_id,
+      creatorId: contract.creator_id,
+      grossAmountInr: contract.gross_amount_inr,
+      advanceAmountInr: contract.advance_amount_inr,
+      balanceAmountInr: contract.balance_amount_inr,
+      paymentMode: contract.payment_mode,
+      tdsSection: contract.tds_section,
+      tdsAmountInr: contract.tds_amount_inr,
+      campaignBrief: contract.campaign_brief,
+      creatorSignedAt: new Date().toISOString()
+    });
 
     // Update contract status to ACCEPTED
     await query(
       `UPDATE contracts
        SET status = 'ACCEPTED',
            creator_signed_at = NOW(),
-           sha256_digest = COALESCE(sha256_digest, $1),
+           sha256_digest = $1,
            updated_at = NOW()
        WHERE id = $2`,
       [signatureDigest, contractId]

@@ -50,6 +50,28 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { upiId, bankAccountNumber, bankIfsc } = body;
 
+    // Financial detail validation
+    if (upiId && typeof upiId === "string" && upiId.trim()) {
+      const upiRegex = /^[a-zA-Z0-9.\-_]{2,100}@[a-zA-Z]{2,64}$/;
+      if (!upiRegex.test(upiId.trim())) {
+        return NextResponse.json({ error: "Please enter a valid UPI VPA address (e.g. name@okhdfcbank)." }, { status: 400 });
+      }
+    }
+
+    if (bankIfsc && typeof bankIfsc === "string" && bankIfsc.trim()) {
+      const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+      if (!ifscRegex.test(bankIfsc.trim().toUpperCase())) {
+        return NextResponse.json({ error: "Invalid RBI IFSC format. Must be 11 characters (e.g. HDFC0001234)." }, { status: 400 });
+      }
+    }
+
+    if (bankAccountNumber && typeof bankAccountNumber === "string" && bankAccountNumber.trim()) {
+      const accRegex = /^[0-9]{9,18}$/;
+      if (!accRegex.test(bankAccountNumber.trim())) {
+        return NextResponse.json({ error: "Bank account number must be 9-18 digits." }, { status: 400 });
+      }
+    }
+
     await query(
       `UPDATE creator_profiles
        SET upi_id = $1,
@@ -57,7 +79,12 @@ export async function PUT(request: Request) {
            bank_ifsc = $3,
            updated_at = NOW()
        WHERE user_id = $4`,
-      [upiId || null, bankAccountNumber || null, bankIfsc || null, session.userId]
+      [
+        upiId ? upiId.trim() : null,
+        bankAccountNumber ? bankAccountNumber.trim() : null,
+        bankIfsc ? bankIfsc.trim().toUpperCase() : null,
+        session.userId
+      ]
     );
 
     return NextResponse.json({

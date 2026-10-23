@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { comparePassword, signSessionToken, COOKIE_NAME } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(`login_${ip}`, 15, 15 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Too many login attempts from this network. Please retry in ${rateCheck.retryAfterSec} seconds.` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email, password } = body;
 

@@ -2,12 +2,23 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { calculateTdsDeduction, generateContractSha256Digest } from "@/lib/contracts";
+import { checkRateLimit } from "@/lib/rate-limit";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session || (session.role !== "AGENCY" && session.role !== "ADMIN" && session.role !== "SUPER_ADMIN")) {
       return NextResponse.json({ error: "Unauthorized agency session" }, { status: 401 });
+    }
+
+    // Rate limit deal proposals to prevent spam flooding
+    const rateCheck = checkRateLimit(`propose_${session.userId}`, 20, 60 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Deal proposal rate limit reached. Please wait ${rateCheck.retryAfterSec} seconds.` },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
@@ -28,8 +39,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required contract proposal fields" }, { status: 400 });
     }
 
-    const gross = Math.max(1000, Number(gross_amount_inr));
-    const advPercent = Math.min(100, Math.max(0, Number(advance_percent)));
+    // Verify creator exists and is an ACTIVE creator
+    const creatorCheck = await query(
+      `SELECT id FROM users WHERE id = $1 AND role = 'CREATOR' AND status = 'ACTIVE'`,
+      [creator_id]
+    );
+    if (creatorCheck.rows.length === 0) {
+      return NextResponse.json({ error: "Selected creator does not exist or account is inactive." }, { status: 404 });
+    }
+
+    // Strict numerical bounds validation
+    const rawGross = Number(gross_amount_inr);
+    if (!Number.isFinite(rawGross) || rawGross < 1000 || rawGross > 50000000) {
+      return NextResponse.json({ error: "Gross amount must be between ₹1,000 and ₹5,00,00,000." }, { status: 400 });
+    }
+    const gross = Math.round(rawGross);
+
+    const rawAdvPercent = Number(advance_percent);
+    if (!Number.isFinite(rawAdvPercent) || rawAdvPercent < 0 || rawAdvPercent > 100) {
+      return NextResponse.json({ error: "Advance percent must be between 0% and 100%." }, { status: 400 });
+    }
+    const advPercent = Math.round(rawAdvPercent);
+
     const advanceAmount = Math.round((gross * advPercent) / 100);
     const balanceAmount = gross - advanceAmount;
 
@@ -37,9 +68,9 @@ export async function POST(request: Request) {
     const tdsCalc = calculateTdsDeduction(gross, tds_section as any);
     const netPayable = gross - tdsCalc.tdsAmountInr;
 
-    // Generate unique contract number
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const contractNumber = `CK-2026-${randomSuffix}`;
+    // SEC-07 FIX: High-entropy collision-free contract number
+    const uniqueSuffix = `${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
+    const contractNumber = `CK-2026-${uniqueSuffix}`;
 
     // Cryptographic SHA-256 hash sealing terms
     const termsDigest = generateContractSha256Digest({
